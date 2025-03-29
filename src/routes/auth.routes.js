@@ -53,7 +53,7 @@ router.post('/register', registerValidation, validate, authController.register);
 router.post('/login', loginValidation, validate, authController.login);
 router.post('/forgot-password', forgotPasswordValidation, validate, authController.forgotPassword);
 router.post('/reset-password', resetPasswordValidation, validate, authController.resetPassword);
-router.get('/me', auth, authController.getMe);
+router.get('/me', auth, authController.getCurrentUser);
 router.post('/logout', auth, authController.logout);
 
 module.exports = router;

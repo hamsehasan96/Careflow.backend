@@ -156,8 +156,7 @@ exports.forgotPassword = async (req, res) => {
 
 // Reset password
 exports.resetPassword = async (req, res) => {
-  const { token } = req.params;
-  const { password } = req.body;
+  const { token, password } = req.body;
 
   try {
     // Verify token
@@ -182,6 +181,18 @@ exports.resetPassword = async (req, res) => {
     if (err.name === 'JsonWebTokenError') {
       return res.status(401).json({ message: 'Invalid token' });
     }
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Logout user
+exports.logout = async (req, res) => {
+  try {
+    // In a stateless JWT authentication system, the client is responsible for removing the token
+    // Server-side, we can just return a success message
+    res.json({ message: 'Logged out successfully' });
+  } catch (err) {
+    console.error(err.message);
     res.status(500).json({ message: 'Server error' });
   }
 };
