@@ -1,7 +1,7 @@
 const { body, validationResult } = require('express-validator');
 const express = require('express');
 const router = express.Router();
-const authController = require('../controllers/auth.controller');
+const { register, login, getCurrentUser, forgotPassword, resetPassword, logout } = require('../controllers/auth.controller');
 const { auth } = require('../middleware/auth.middleware');
 
 // Validation rules
@@ -49,11 +49,11 @@ const validate = (req, res, next) => {
 };
 
 // Routes
-router.post('/register', registerValidation, validate, authController.register);
-router.post('/login', loginValidation, validate, authController.login);
-router.post('/forgot-password', forgotPasswordValidation, validate, authController.forgotPassword);
-router.post('/reset-password', resetPasswordValidation, validate, authController.resetPassword);
-router.get('/me', auth, authController.getCurrentUser);
-router.post('/logout', auth, authController.logout);
+router.post('/register', registerValidation, validate, register);
+router.post('/login', loginValidation, validate, login);
+router.post('/forgot-password', forgotPasswordValidation, validate, forgotPassword);
+router.post('/reset-password', resetPasswordValidation, validate, resetPassword);
+router.get('/me', auth, getCurrentUser);
+router.post('/logout', auth, logout);
 
 module.exports = router;
