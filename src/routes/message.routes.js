@@ -1,27 +1,35 @@
 const express = require('express');
 const router = express.Router();
 const { check } = require('express-validator');
-const messageController = require('../controllers/message.controller');
+const { 
+  getUserMessages, 
+  getConversation, 
+  getUserContacts, 
+  sendMessage, 
+  markMessageAsRead, 
+  markConversationAsRead, 
+  deleteMessage 
+} = require('../controllers/message.controller');
 
 // Get all messages for a user (both sent and received)
 router.get(
   '/user/:userId',
   // authMiddleware,
-  messageController.getUserMessages
+  getUserMessages
 );
 
 // Get conversation between two users
 router.get(
   '/conversation/:userId/:otherUserId',
   // authMiddleware,
-  messageController.getConversation
+  getConversation
 );
 
 // Get user's contacts with latest message and unread count
 router.get(
   '/contacts/:userId',
   // authMiddleware,
-  messageController.getUserContacts
+  getUserContacts
 );
 
 // Send a message
@@ -33,28 +41,28 @@ router.post(
     check('receiverId', 'Receiver ID is required').not().isEmpty(),
     check('content', 'Content is required').not().isEmpty()
   ],
-  messageController.sendMessage
+  sendMessage
 );
 
 // Mark message as read
 router.put(
   '/:messageId/read',
   // authMiddleware,
-  messageController.markMessageAsRead
+  markMessageAsRead
 );
 
 // Mark all messages in a conversation as read
 router.put(
   '/conversation/:userId/:otherUserId/read',
   // authMiddleware,
-  messageController.markConversationAsRead
+  markConversationAsRead
 );
 
 // Delete a message
 router.delete(
   '/:messageId',
   // authMiddleware,
-  messageController.deleteMessage
+  deleteMessage
 );
 
 module.exports = router;

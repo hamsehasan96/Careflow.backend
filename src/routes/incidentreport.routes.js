@@ -1,34 +1,43 @@
 const express = require('express');
 const router = express.Router();
 const { check } = require('express-validator');
-const incidentReportController = require('../controllers/incidentreport.controller');
+const { 
+  getAllIncidentReports, 
+  getParticipantIncidentReports, 
+  getReporterIncidentReports, 
+  getIncidentReportById, 
+  createIncidentReport, 
+  updateIncidentReport, 
+  closeIncidentReport, 
+  deleteIncidentReport 
+} = require('../controllers/incidentreport.controller');
 
 // Get all incident reports
 router.get(
   '/',
   // authMiddleware,
-  incidentReportController.getAllIncidentReports
+  getAllIncidentReports
 );
 
 // Get incident reports for a specific participant
 router.get(
   '/participant/:participantId',
   // authMiddleware,
-  incidentReportController.getParticipantIncidentReports
+  getParticipantIncidentReports
 );
 
 // Get incident reports by reporter
 router.get(
   '/reporter/:reporterId',
   // authMiddleware,
-  incidentReportController.getReporterIncidentReports
+  getReporterIncidentReports
 );
 
 // Get incident report by ID
 router.get(
   '/:id',
   // authMiddleware,
-  incidentReportController.getIncidentReportById
+  getIncidentReportById
 );
 
 // Create new incident report
@@ -45,28 +54,28 @@ router.post(
     check('immediateActions', 'Immediate actions are required').not().isEmpty(),
     check('participantId', 'Participant ID is required').not().isEmpty()
   ],
-  incidentReportController.createIncidentReport
+  createIncidentReport
 );
 
 // Update incident report
 router.put(
   '/:id',
   // authMiddleware,
-  incidentReportController.updateIncidentReport
+  updateIncidentReport
 );
 
 // Close incident report
 router.put(
   '/:id/close',
   // authMiddleware,
-  incidentReportController.closeIncidentReport
+  closeIncidentReport
 );
 
 // Delete incident report
 router.delete(
   '/:id',
   // authMiddleware,
-  incidentReportController.deleteIncidentReport
+  deleteIncidentReport
 );
 
 module.exports = router;

@@ -1,27 +1,39 @@
 const express = require('express');
 const router = express.Router();
 const { check } = require('express-validator');
-const invoiceController = require('../controllers/invoice.controller');
+const { 
+  getAllInvoices, 
+  getInvoiceById, 
+  getParticipantInvoices, 
+  createInvoice, 
+  updateInvoice, 
+  sendInvoice, 
+  markInvoiceAsPaid, 
+  cancelInvoice, 
+  generateInvoicePdf, 
+  exportInvoicesToCsv, 
+  getNdisSupportItems 
+} = require('../controllers/invoice.controller');
 
 // Get all invoices
 router.get(
   '/',
   // authMiddleware,
-  invoiceController.getAllInvoices
+  getAllInvoices
 );
 
 // Get invoice by ID
 router.get(
   '/:id',
   // authMiddleware,
-  invoiceController.getInvoiceById
+  getInvoiceById
 );
 
 // Get invoices for a participant
 router.get(
   '/participant/:participantId',
   // authMiddleware,
-  invoiceController.getParticipantInvoices
+  getParticipantInvoices
 );
 
 // Create new invoice
@@ -35,56 +47,56 @@ router.post(
     check('dueDate', 'Due date is required').not().isEmpty(),
     check('lineItems', 'Line items are required').isArray().not().isEmpty()
   ],
-  invoiceController.createInvoice
+  createInvoice
 );
 
 // Update invoice
 router.put(
   '/:id',
   // authMiddleware,
-  invoiceController.updateInvoice
+  updateInvoice
 );
 
 // Send invoice
 router.put(
   '/:id/send',
   // authMiddleware,
-  invoiceController.sendInvoice
+  sendInvoice
 );
 
 // Mark invoice as paid
 router.put(
   '/:id/paid',
   // authMiddleware,
-  invoiceController.markInvoiceAsPaid
+  markInvoiceAsPaid
 );
 
 // Cancel invoice
 router.put(
   '/:id/cancel',
   // authMiddleware,
-  invoiceController.cancelInvoice
+  cancelInvoice
 );
 
 // Generate PDF invoice
 router.get(
   '/:id/pdf',
   // authMiddleware,
-  invoiceController.generateInvoicePdf
+  generateInvoicePdf
 );
 
 // Export invoices to CSV
 router.get(
   '/export/csv',
   // authMiddleware,
-  invoiceController.exportInvoicesToCsv
+  exportInvoicesToCsv
 );
 
 // Get NDIS support items
 router.get(
   '/ndis/support-items',
   // authMiddleware,
-  invoiceController.getNdisSupportItems
+  getNdisSupportItems
 );
 
 module.exports = router;
