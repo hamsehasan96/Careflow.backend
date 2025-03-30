@@ -10,13 +10,14 @@ const logger = require('./config/logger');
 const monitoring = require('./config/monitoring');
 const performanceMiddleware = require('./middleware/performance.middleware');
 const cacheMiddleware = require('./middleware/cache.middleware');
+const { errorHandler, handleUnhandledRejection, handleUncaughtException } = require('./middleware/error.middleware');
+const { apiLimiter, authLimiter, workerLimiter } = require('./middleware/rateLimit.middleware');
+const { validate, sanitize, validateApiKey } = require('./middleware/validate.middleware');
+const { performanceMonitor, healthCheck } = require('./middleware/performance.middleware');
 require('dotenv').config();
 
 // Import security middleware
 const { 
-  apiLimiter, 
-  authLimiter, 
-  speedLimiter,
   csrfProtection, 
   handleCSRFError,
   xssProtection,
@@ -58,20 +59,41 @@ app.use(monitoring.sentryRequestHandler()); // Sentry request handler should be 
 app.use(cors({
   origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
+  credentials: true,
+  maxAge: 86400 // 24 hours
 }));
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", process.env.API_URL || "http://localhost:3000"],
+      fontSrc: ["'self'", "https:", "data:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      sandbox: ['allow-forms', 'allow-scripts', 'allow-same-origin']
+    }
+  },
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(xssProtection);
 app.use(parameterProtection);
 app.use(mongoQuerySanitization);
 app.use(speedLimiter);
 
 // Compression middleware
-app.use(compression());
+app.use(compression({
+  level: 6,
+  threshold: 100 * 1000 // Only compress responses larger than 100kb
+}));
 
 // Performance monitoring
-app.use(performanceMiddleware);
+app.use(performanceMonitor);
 
 // Cache middleware for GET requests
 app.use(cacheMiddleware());
@@ -87,14 +109,25 @@ app.use(sanitizeQuery);
 app.use(sanitizeParams);
 
 // Static files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+  maxAge: '1d',
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, path) => {
+    if (path.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
+}));
 
 // Apply rate limiting to API routes
 app.use('/api/', apiLimiter);
 // Apply stricter rate limiting to auth routes
 app.use('/api/auth/', authLimiter);
+app.use('/api/workers', workerLimiter);
 
 // API routes
+app.get('/health', healthCheck);
 app.get('/api/health', async (req, res) => {
   try {
     const dbStatus = await sequelize.authenticate();
@@ -138,6 +171,13 @@ app.use('/api/audit', validateApiKey, auditRoutes);
 app.use(handleValidationErrors);
 app.use(handleCSRFError);
 app.use(monitoring.sentryErrorHandler());
+app.use(errorHandler);
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', handleUnhandledRejection);
+
+// Handle uncaught exceptions
+process.on('uncaughtException', handleUncaughtException);
 
 // Initialize database and start server
 const initializeApp = async () => {

@@ -3,13 +3,48 @@ const RedisStore = require('rate-limit-redis');
 const { redis } = require('../config/redis');
 const logger = require('../config/logger');
 
+// Fallback memory store for when Redis is unavailable
+const memoryStore = new Map();
+
 // Create different rate limiters for different endpoints
 const createRateLimiter = (windowMs, max, message) => {
-  return rateLimit({
+  const limiter = rateLimit({
     store: new RedisStore({
       client: redis,
       prefix: 'rate-limit:',
-      resetExpiryOnChange: true
+      resetExpiryOnChange: true,
+      // Add error handling for Redis connection failures
+      onError: (error) => {
+        logger.error('Redis rate limiter error:', error);
+        // Fallback to memory store
+        limiter.store = {
+          incr: (key) => {
+            const now = Date.now();
+            const windowStart = now - windowMs;
+            const keyData = memoryStore.get(key) || { count: 0, resetTime: now + windowMs };
+            
+            // Clean up old data
+            if (keyData.resetTime < now) {
+              keyData.count = 0;
+              keyData.resetTime = now + windowMs;
+            }
+            
+            keyData.count++;
+            memoryStore.set(key, keyData);
+            return keyData.count;
+          },
+          decr: (key) => {
+            const keyData = memoryStore.get(key);
+            if (keyData) {
+              keyData.count = Math.max(0, keyData.count - 1);
+              memoryStore.set(key, keyData);
+            }
+          },
+          resetKey: (key) => {
+            memoryStore.delete(key);
+          }
+        };
+      }
     }),
     windowMs,
     max,
@@ -23,6 +58,8 @@ const createRateLimiter = (windowMs, max, message) => {
       });
     }
   });
+
+  return limiter;
 };
 
 // API rate limiter (100 requests per 15 minutes)

@@ -1,6 +1,9 @@
 const { redis } = require('../config/redis');
 const logger = require('../config/logger');
 
+// In-memory fallback for metrics when Redis is unavailable
+const memoryMetrics = new Map();
+
 // Performance monitoring middleware
 const performanceMonitor = (req, res, next) => {
   const start = process.hrtime();
@@ -23,8 +26,10 @@ const performanceMonitor = (req, res, next) => {
       user: req.user ? req.user.id : 'anonymous'
     });
 
-    // Store metrics in Redis for aggregation
-    storeMetrics(req.method, req.path, duration, res.statusCode);
+    // Store metrics in Redis or memory
+    storeMetrics(req.method, req.path, duration, res.statusCode).catch(error => {
+      logger.error('Failed to store performance metrics:', error);
+    });
 
     // Call original end function
     return originalEnd.call(this, chunk, encoding, callback);
@@ -33,43 +38,53 @@ const performanceMonitor = (req, res, next) => {
   next();
 };
 
-// Store performance metrics in Redis
+// Store performance metrics in Redis or memory
 async function storeMetrics(method, path, duration, statusCode) {
+  const key = `performance:${method}:${path}`;
+  const timestamp = Math.floor(Date.now() / 1000);
+
   try {
-    const key = `performance:${method}:${path}`;
-    const timestamp = Math.floor(Date.now() / 1000);
-
-    // Store request count
+    // Try Redis first
     await redis.hincrby(key, 'count', 1);
-
-    // Store average duration
     const currentAvg = await redis.hget(key, 'avgDuration');
     const currentCount = await redis.hget(key, 'count');
     const newAvg = ((currentAvg || 0) * (currentCount - 1) + duration) / currentCount;
     await redis.hset(key, 'avgDuration', newAvg);
-
-    // Store status code distribution
     await redis.hincrby(key, `status:${statusCode}`, 1);
-
-    // Store timestamp for time-series data
     await redis.zadd(`${key}:timestamps`, timestamp, `${timestamp}:${duration}`);
 
     // Clean up old data (keep last 24 hours)
     const cutoff = timestamp - (24 * 60 * 60);
     await redis.zremrangebyscore(`${key}:timestamps`, 0, cutoff);
-
   } catch (error) {
-    logger.error('Failed to store performance metrics:', error);
+    // Fallback to memory storage
+    logger.warn('Redis unavailable, using memory storage for metrics');
+    const metrics = memoryMetrics.get(key) || {
+      count: 0,
+      avgDuration: 0,
+      statusCodes: {},
+      timestamps: []
+    };
+
+    metrics.count++;
+    metrics.avgDuration = ((metrics.avgDuration * (metrics.count - 1)) + duration) / metrics.count;
+    metrics.statusCodes[statusCode] = (metrics.statusCodes[statusCode] || 0) + 1;
+    metrics.timestamps.push({ timestamp, duration });
+
+    // Clean up old data
+    metrics.timestamps = metrics.timestamps.filter(t => t.timestamp > timestamp - (24 * 60 * 60));
+
+    memoryMetrics.set(key, metrics);
   }
 }
 
 // Get performance metrics
 async function getPerformanceMetrics(method, path) {
+  const key = `performance:${method}:${path}`;
+
   try {
-    const key = `performance:${method}:${path}`;
+    // Try Redis first
     const metrics = await redis.hgetall(key);
-    
-    // Get time-series data
     const timestamps = await redis.zrange(`${key}:timestamps`, 0, -1);
     
     return {
@@ -83,27 +98,58 @@ async function getPerformanceMetrics(method, path) {
       })
     };
   } catch (error) {
-    logger.error('Failed to get performance metrics:', error);
-    return null;
+    // Fallback to memory storage
+    logger.warn('Redis unavailable, using memory storage for metrics');
+    const metrics = memoryMetrics.get(key);
+    if (!metrics) return null;
+
+    return {
+      count: metrics.count,
+      avgDuration: metrics.avgDuration,
+      statusCodes: metrics.statusCodes,
+      timeSeries: metrics.timestamps
+    };
   }
 }
 
 // Health check middleware
-const healthCheck = (req, res) => {
+const healthCheck = async (req, res) => {
   const health = {
     uptime: process.uptime(),
     message: 'OK',
     timestamp: Date.now(),
     services: {
-      redis: redis.status === 'ready',
-      database: global.sequelize ? global.sequelize.authenticate() : false
+      redis: false,
+      database: false
     }
   };
 
   try {
+    // Check Redis connection
+    try {
+      await redis.ping();
+      health.services.redis = true;
+    } catch (error) {
+      logger.error('Redis health check failed:', error);
+      health.services.redis = false;
+    }
+
+    // Check database connection
+    try {
+      await global.sequelize.authenticate();
+      health.services.database = true;
+    } catch (error) {
+      logger.error('Database health check failed:', error);
+      health.services.database = false;
+    }
+
+    // Set overall health status
+    health.status = Object.values(health.services).every(Boolean) ? 'healthy' : 'degraded';
+    
     res.status(200).json(health);
   } catch (error) {
-    health.message = error;
+    health.message = error.message;
+    health.status = 'unhealthy';
     res.status(503).json(health);
   }
 };
