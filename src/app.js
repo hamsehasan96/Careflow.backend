@@ -8,12 +8,11 @@ const morgan = require('morgan');
 const path = require('path');
 const logger = require('./config/logger');
 const monitoring = require('./config/monitoring');
-const performanceMiddleware = require('./middleware/performance.middleware');
-const cacheMiddleware = require('./middleware/cache.middleware');
 const { errorHandler, handleUnhandledRejection, handleUncaughtException } = require('./middleware/error.middleware');
 const { apiLimiter, authLimiter, workerLimiter } = require('./middleware/rateLimit.middleware');
 const { validate, sanitize, validateApiKey } = require('./middleware/validate.middleware');
 const { performanceMonitor, healthCheck } = require('./middleware/performance.middleware');
+const cacheMiddleware = require('./middleware/cache.middleware');
 require('dotenv').config();
 
 // Import security middleware
@@ -84,7 +83,7 @@ app.use(helmet({
 app.use(xssProtection);
 app.use(parameterProtection);
 app.use(mongoQuerySanitization);
-app.use(speedLimiter);
+app.use(securityHeaders);
 
 // Compression middleware
 app.use(compression({
@@ -122,38 +121,11 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
 
 // Apply rate limiting to API routes
 app.use('/api/', apiLimiter);
-// Apply stricter rate limiting to auth routes
 app.use('/api/auth/', authLimiter);
 app.use('/api/workers', workerLimiter);
 
-// API routes
+// Health check endpoint
 app.get('/health', healthCheck);
-app.get('/api/health', async (req, res) => {
-  try {
-    const dbStatus = await sequelize.authenticate();
-    const uptime = process.uptime();
-    const memoryUsage = process.memoryUsage();
-    
-    res.status(200).json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      database: dbStatus ? 'connected' : 'disconnected',
-      uptime: `${Math.floor(uptime)} seconds`,
-      memory: {
-        heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
-        heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`,
-        external: `${Math.round(memoryUsage.external / 1024 / 1024)}MB`
-      }
-    });
-  } catch (error) {
-    logger.error('Health check failed:', error);
-    res.status(500).json({
-      status: 'unhealthy',
-      timestamp: new Date().toISOString(),
-      error: error.message
-    });
-  }
-});
 
 // API routes
 app.use('/api/auth', authRoutes);
@@ -200,11 +172,9 @@ const initializeApp = async () => {
     
     // Handle database migrations based on environment
     if (process.env.NODE_ENV === 'development') {
-      // In development, use sync with force: false for safety
       await sequelize.sync({ force: false });
       logger.info('Database models synchronized');
       
-      // Seed database if in development mode and SEED_DATABASE is true
       if (process.env.SEED_DATABASE === 'true') {
         const seedResult = await seedDatabase();
         if (seedResult) {
@@ -212,50 +182,44 @@ const initializeApp = async () => {
         }
       }
     } else {
-      // In production, just verify the connection
       await sequelize.authenticate();
       logger.info('Database connection verified');
       
-      // Run migrations if AUTO_MIGRATE is enabled
       if (process.env.AUTO_MIGRATE === 'true') {
         try {
           await sequelize.runMigrations();
           logger.info('Database migrations completed successfully');
         } catch (error) {
           logger.error('Failed to run database migrations:', error);
-          // Don't throw error here, just log it
         }
       }
     }
     
-    // Start server with healthcare-specific settings
-    const PORT = process.env.PORT || 10000;
+    // Start server
+    const PORT = process.env.PORT || 3000;
     const server = app.listen(PORT, '0.0.0.0', () => {
       logger.info(`Server is running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV}`);
-      logger.info(`Healthcare API Version: ${process.env.API_VERSION || '1.0.0'}`);
+      logger.info(`API Version: ${process.env.API_VERSION || '1.0.0'}`);
     });
 
-    // Enhanced error handling for healthcare operations
+    // Enhanced error handling
     server.on('error', (error) => {
       logger.error('Server error:', error);
-      // Attempt graceful shutdown
       server.close(() => {
         logger.info('Server closed after error');
         process.exit(1);
       });
     });
 
-    // Handle process termination with healthcare data safety
+    // Graceful shutdown
     const gracefulShutdown = async (signal) => {
       logger.info(`${signal} received. Starting graceful shutdown...`);
       
-      // Close server first
       server.close(() => {
         logger.info('Server closed');
       });
       
-      // Close database connections
       try {
         await sequelize.close();
         logger.info('Database connections closed');
@@ -263,21 +227,12 @@ const initializeApp = async () => {
         logger.error('Error closing database connections:', error);
       }
       
-      // Exit process
       process.exit(0);
     };
 
     // Handle various termination signals
     process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-    process.on('uncaughtException', (error) => {
-      logger.error('Uncaught Exception:', error);
-      gracefulShutdown('uncaughtException');
-    });
-    process.on('unhandledRejection', (reason, promise) => {
-      logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
-      gracefulShutdown('unhandledRejection');
-    });
 
   } catch (error) {
     logger.error('Unable to connect to the database or start server:', error);
