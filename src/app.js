@@ -164,6 +164,10 @@ const initializeApp = async () => {
     await sequelize.authenticate();
     logger.info('Database connection has been established successfully.');
     
+    // Load models
+    require('./models');
+    logger.info('Models loaded successfully');
+    
     // Handle database migrations based on environment
     if (process.env.NODE_ENV === 'development') {
       // In development, use sync with force: false for safety
