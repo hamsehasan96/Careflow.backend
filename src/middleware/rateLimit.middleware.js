@@ -8,7 +8,7 @@ const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
 // General API rate limiter
 const apiLimiter = rateLimit({
-  store: new RedisStore({
+  store: RedisStore({
     client: redis,
     prefix: 'rate-limit:api:'
   }),
@@ -29,7 +29,7 @@ const apiLimiter = rateLimit({
 
 // Auth routes rate limiter (stricter)
 const authLimiter = rateLimit({
-  store: new RedisStore({
+  store: RedisStore({
     client: redis,
     prefix: 'rate-limit:auth:'
   }),
@@ -50,7 +50,7 @@ const authLimiter = rateLimit({
 
 // Worker routes rate limiter
 const workerLimiter = rateLimit({
-  store: new RedisStore({
+  store: RedisStore({
     client: redis,
     prefix: 'rate-limit:worker:'
   }),
@@ -71,7 +71,7 @@ const workerLimiter = rateLimit({
 
 // Forgot password rate limiter
 const forgotPasswordLimiter = rateLimit({
-  store: new RedisStore({
+  store: RedisStore({
     client: redis,
     prefix: 'rate-limit:forgot-password:'
   }),
