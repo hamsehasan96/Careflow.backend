@@ -8,7 +8,6 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "build": "npm install",
     "test": "jest --runInBand",
     "test:watch": "jest --watch",
     "migrate": "sequelize-cli db:migrate",
