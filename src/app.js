@@ -7,6 +7,8 @@ const morgan = require('morgan');
 const path = require('path');
 const logger = require('./config/logger');
 const monitoring = require('./config/monitoring');
+const performanceMiddleware = require('./middleware/performance.middleware');
+const cacheMiddleware = require('./middleware/cache.middleware');
 require('dotenv').config();
 
 // Import security middleware
@@ -66,6 +68,12 @@ app.use(xssProtection);
 app.use(parameterProtection);
 app.use(mongoQuerySanitization);
 app.use(speedLimiter);
+
+// Performance monitoring
+app.use(performanceMiddleware);
+
+// Cache middleware for GET requests
+app.use(cacheMiddleware());
 
 // Standard middleware
 app.use(morgan('combined', { stream: logger.stream }));

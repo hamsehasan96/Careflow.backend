@@ -1,5 +1,5 @@
 const { validationResult } = require('express-validator');
-const Participant = require('../models/participant.model');
+const { Participant } = require('../models');
 
 // Get all participants
 exports.getAllParticipants = async (req, res) => {

@@ -1,72 +1,81 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/database');
-
-const CareNote = sequelize.define('CareNote', {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true
-  },
-  noteType: {
-    type: DataTypes.ENUM('shift_note', 'progress_note', 'incident_report', 'restrictive_practice'),
-    allowNull: false,
-    defaultValue: 'shift_note'
-  },
-  content: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  date: {
-    type: DataTypes.DATEONLY,
-    allowNull: false,
-    defaultValue: DataTypes.NOW
-  },
-  startTime: {
-    type: DataTypes.TIME,
-    allowNull: true
-  },
-  endTime: {
-    type: DataTypes.TIME,
-    allowNull: true
-  },
-  location: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
-  moodRating: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    validate: {
-      min: 1,
-      max: 5
+module.exports = (sequelize, DataTypes) => {
+  const CareNote = sequelize.define('CareNote', {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true
+    },
+    participantId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'Participants',
+        key: 'id'
+      }
+    },
+    staffId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'Users',
+        key: 'id'
+      }
+    },
+    date: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
+    type: {
+      type: DataTypes.ENUM('daily', 'incident', 'medication', 'behavior', 'other'),
+      allowNull: false
+    },
+    content: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    mood: {
+      type: DataTypes.ENUM('happy', 'neutral', 'sad', 'angry', 'anxious'),
+      allowNull: true
+    },
+    activities: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    medications: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    vitalSigns: {
+      type: DataTypes.JSONB,
+      allowNull: true
+    },
+    concerns: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    followUpRequired: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    followUpNotes: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
-  },
-  goalProgress: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  followUpRequired: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
-  },
-  followUpDetails: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  attachments: {
-    type: DataTypes.ARRAY(DataTypes.STRING),
-    defaultValue: []
-  },
-  signedBy: {
-    type: DataTypes.UUID,
-    allowNull: true
-  },
-  signatureTimestamp: {
-    type: DataTypes.DATE,
-    allowNull: true
-  }
-}, {
-  timestamps: true
-});
+  }, {
+    timestamps: true
+  });
 
-module.exports = CareNote;
+  // Define associations
+  CareNote.associate = (models) => {
+    CareNote.belongsTo(models.Participant, {
+      foreignKey: 'participantId',
+      as: 'participant'
+    });
+    CareNote.belongsTo(models.User, {
+      foreignKey: 'staffId',
+      as: 'staff'
+    });
+  };
+
+  return CareNote;
+};

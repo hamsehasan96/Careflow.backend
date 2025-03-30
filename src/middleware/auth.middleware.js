@@ -37,7 +37,7 @@ const validateLogin = [
 /**
  * Middleware to verify JWT token
  */
-const verifyToken = (req, res, next) => {
+const auth = (req, res, next) => {
   const token = req.headers['x-access-token'] || req.headers['authorization']?.split(' ')[1];
 
   if (!token) {
@@ -101,31 +101,20 @@ const checkOwnership = (getResourceUserId) => {
       }
 
       const resourceUserId = await getResourceUserId(req);
-      
-      // If resource doesn't belong to any user, deny access
-      if (!resourceUserId) {
-        logger.warn('Resource ownership check failed: Resource not found');
-        return res.status(404).json({
-          status: 'error',
-          message: 'Resource not found'
-        });
-      }
-
-      // Allow access if user is accessing their own data
-      if (resourceUserId.toString() === req.userId.toString()) {
+      if (resourceUserId === req.userId) {
         return next();
       }
 
-      logger.warn(`Ownership check failed: User ${req.userId} attempted to access resource owned by ${resourceUserId}`);
+      logger.warn(`Access denied: User ${req.userId} attempted to access resource owned by ${resourceUserId}`);
       return res.status(403).json({
         status: 'error',
-        message: 'Access denied: You can only access your own data'
+        message: 'Access denied: You can only access your own resources'
       });
     } catch (error) {
-      logger.error(`Ownership check error: ${error.message}`);
+      logger.error('Error in ownership check:', error);
       return res.status(500).json({
         status: 'error',
-        message: 'Internal server error during ownership verification'
+        message: 'Internal server error: Ownership verification failed'
       });
     }
   };
@@ -134,7 +123,7 @@ const checkOwnership = (getResourceUserId) => {
 module.exports = {
   validateRegistration,
   validateLogin,
-  verifyToken,
+  auth,
   checkRole,
   checkOwnership
 };
