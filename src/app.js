@@ -134,16 +134,20 @@ const initializeApp = async () => {
     await sequelize.authenticate();
     console.log('Database connection has been established successfully.');
     
-    // Sync database models
-    await sequelize.sync({ alter: true });
-    console.log('Database models synchronized');
-    
-    // Seed database if in development mode
+    // Sync database models (only in development)
     if (process.env.NODE_ENV === 'development') {
+      await sequelize.sync({ alter: true });
+      console.log('Database models synchronized');
+      
+      // Seed database if in development mode
       const seedResult = await seedDatabase();
       if (seedResult) {
         console.log('Database seeded successfully');
       }
+    } else {
+      // In production, just verify the connection
+      await sequelize.authenticate();
+      console.log('Database connection verified');
     }
     
     // Start server
@@ -153,6 +157,7 @@ const initializeApp = async () => {
     });
   } catch (error) {
     console.error('Unable to connect to the database or start server:', error);
+    process.exit(1); // Exit with error code
   }
 };
 
