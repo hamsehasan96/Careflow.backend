@@ -110,7 +110,7 @@ const login = async (req, res) => {
 // Get current user
 const getCurrentUser = async (req, res) => {
   try {
-    const user = await User.findByPk(req.user.id, {
+    const user = await User.findByPk(req.userId, {
       attributes: { exclude: ['password'] }
     });
     
