@@ -18,11 +18,19 @@ fs.readdirSync(__dirname)
   .forEach(file => {
     try {
       const model = require(path.join(__dirname, file));
-      if (model && model.name) {
+      if (typeof model === 'function') {
+        const modelInstance = model(sequelize, DataTypes);
+        if (modelInstance && modelInstance.name) {
+          models[modelInstance.name] = modelInstance;
+          logger.info(`Loaded model: ${modelInstance.name}`);
+        } else {
+          logger.error(`Invalid model in ${file}: Model must have a name property`);
+        }
+      } else if (model && model.name) {
         models[model.name] = model;
         logger.info(`Loaded model: ${model.name}`);
       } else {
-        logger.error(`Invalid model in ${file}: Model must have a name property`);
+        logger.error(`Invalid model in ${file}: Model must be a function or have a name property`);
       }
     } catch (error) {
       logger.error(`Error loading model ${file}:`, error);
