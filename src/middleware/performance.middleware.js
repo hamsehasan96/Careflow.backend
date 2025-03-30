@@ -1,4 +1,4 @@
-const { redis } = require('../config/redis');
+const { sequelize } = require('../config/database');
 const logger = require('../config/logger');
 
 // In-memory fallback for metrics when Redis is unavailable
@@ -7,34 +7,21 @@ const memoryMetrics = new Map();
 // Performance monitoring middleware
 const performanceMonitor = (req, res, next) => {
   const start = process.hrtime();
-
-  // Store original end function
-  const originalEnd = res.end;
-
-  // Override end function to capture response time
-  res.end = function (chunk, encoding, callback) {
+  
+  res.on('finish', () => {
     const [seconds, nanoseconds] = process.hrtime(start);
     const duration = seconds * 1000 + nanoseconds / 1000000;
-
-    // Log performance metrics
-    logger.info('Request Performance:', {
+    
+    logger.info({
       method: req.method,
-      path: req.path,
+      url: req.url,
+      status: res.statusCode,
       duration: `${duration.toFixed(2)}ms`,
-      statusCode: res.statusCode,
-      ip: req.ip,
-      user: req.user ? req.user.id : 'anonymous'
+      userAgent: req.get('user-agent'),
+      ip: req.ip
     });
-
-    // Store metrics in Redis or memory
-    storeMetrics(req.method, req.path, duration, res.statusCode).catch(error => {
-      logger.error('Failed to store performance metrics:', error);
-    });
-
-    // Call original end function
-    return originalEnd.call(this, chunk, encoding, callback);
-  };
-
+  });
+  
   next();
 };
 
@@ -112,45 +99,43 @@ async function getPerformanceMetrics(method, path) {
   }
 }
 
-// Health check middleware
+// Health check endpoint
 const healthCheck = async (req, res) => {
-  const health = {
-    uptime: process.uptime(),
-    message: 'OK',
-    timestamp: Date.now(),
-    services: {
-      redis: false,
-      database: false
-    }
-  };
-
   try {
-    // Check Redis connection
-    try {
-      await redis.ping();
-      health.services.redis = true;
-    } catch (error) {
-      logger.error('Redis health check failed:', error);
-      health.services.redis = false;
-    }
-
     // Check database connection
-    try {
-      await global.sequelize.authenticate();
-      health.services.database = true;
-    } catch (error) {
-      logger.error('Database health check failed:', error);
-      health.services.database = false;
-    }
-
-    // Set overall health status
-    health.status = Object.values(health.services).every(Boolean) ? 'healthy' : 'degraded';
+    await sequelize.authenticate();
     
-    res.status(200).json(health);
+    // Check Redis connection if configured
+    let redisStatus = 'not configured';
+    if (process.env.REDIS_URL) {
+      const Redis = require('ioredis');
+      const redis = new Redis(process.env.REDIS_URL);
+      await redis.ping();
+      redisStatus = 'connected';
+      await redis.quit();
+    }
+    
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      services: {
+        database: 'connected',
+        redis: redisStatus
+      },
+      environment: process.env.NODE_ENV,
+      version: process.env.API_VERSION || '1.0.0'
+    });
   } catch (error) {
-    health.message = error.message;
-    health.status = 'unhealthy';
-    res.status(503).json(health);
+    logger.error('Health check failed:', error);
+    res.status(503).json({
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      error: error.message,
+      services: {
+        database: error.name === 'SequelizeConnectionError' ? 'disconnected' : 'connected',
+        redis: 'error'
+      }
+    });
   }
 };
 

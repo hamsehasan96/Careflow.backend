@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const mongoSanitize = require('express-mongo-sanitize');
+const logger = require('../config/logger');
 
 // Rate limiting middleware
 const apiLimiter = rateLimit({
@@ -32,7 +33,7 @@ const speedLimiter = slowDown({
 });
 
 // CSRF protection middleware
-const csrfProtection = csrf({ 
+const csrfProtection = csrf({
   cookie: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -40,14 +41,17 @@ const csrfProtection = csrf({
   }
 });
 
-// CSRF error handler
+// Handle CSRF errors
 const handleCSRFError = (err, req, res, next) => {
-  if (err.code !== 'EBADCSRFTOKEN') return next(err);
-  
-  // Handle CSRF token errors
-  res.status(403).json({
-    message: 'Invalid or expired form submission. Please try again.'
-  });
+  if (err.code === 'EBADCSRFTOKEN') {
+    logger.warn(`CSRF token validation failed for IP: ${req.ip}`);
+    return res.status(403).json({
+      status: 'error',
+      message: 'Invalid CSRF token',
+      code: 'INVALID_CSRF_TOKEN'
+    });
+  }
+  next(err);
 };
 
 // XSS protection middleware
@@ -56,8 +60,10 @@ const xssProtection = xss();
 // Parameter pollution protection
 const parameterProtection = hpp({
   whitelist: [
-    // Parameters that can be duplicated in query string
-    'sort', 'fields', 'filter', 'include'
+    'page',
+    'limit',
+    'sort',
+    'fields'
   ]
 });
 
@@ -65,20 +71,32 @@ const parameterProtection = hpp({
 const mongoQuerySanitization = mongoSanitize();
 
 // Security headers middleware (using helmet)
-const securityHeaders = helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com'],
-      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdn.jsdelivr.net'],
-      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-      imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com'],
-      connectSrc: ["'self'", 'https://api.sentry.io']
-    }
-  },
-  crossOriginEmbedderPolicy: false, // Needed for some third-party resources
-  crossOriginResourcePolicy: { policy: 'cross-origin' } // Needed for some third-party resources
-});
+const securityHeaders = (req, res, next) => {
+  // Remove X-Powered-By header
+  res.removeHeader('X-Powered-By');
+
+  // Set security headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+
+  // Content Security Policy
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data: https:; " +
+    "font-src 'self' data: https:; " +
+    "connect-src 'self' " + (process.env.API_URL || 'http://localhost:3000') + "; " +
+    "frame-ancestors 'none';"
+  );
+
+  next();
+};
 
 // File upload security middleware
 const fileUploadSecurity = (req, res, next) => {

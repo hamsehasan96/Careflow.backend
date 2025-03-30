@@ -1,77 +1,98 @@
 const rateLimit = require('express-rate-limit');
+const RedisStore = require('rate-limit-redis');
+const Redis = require('ioredis');
 const logger = require('../config/logger');
 
-// Memory store for rate limiting
-const memoryStore = new Map();
+// Redis client for rate limiting
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
-// Create different rate limiters for different endpoints
-const createRateLimiter = (windowMs, max, message) => {
-  const limiter = rateLimit({
-    store: {
-      incr: (key) => {
-        const now = Date.now();
-        const keyData = memoryStore.get(key) || { count: 0, resetTime: now + windowMs };
-        
-        // Clean up old data
-        if (keyData.resetTime < now) {
-          keyData.count = 0;
-          keyData.resetTime = now + windowMs;
-        }
-        
-        keyData.count++;
-        memoryStore.set(key, keyData);
-        return keyData.count;
-      },
-      decr: (key) => {
-        const keyData = memoryStore.get(key);
-        if (keyData) {
-          keyData.count = Math.max(0, keyData.count - 1);
-          memoryStore.set(key, keyData);
-        }
-      },
-      resetKey: (key) => {
-        memoryStore.delete(key);
-      }
-    },
-    windowMs,
-    max,
-    message: {
-      error: message || 'Too many requests, please try again later.'
-    },
-    handler: (req, res) => {
-      logger.warn(`Rate limit exceeded for IP: ${req.ip}`);
-      res.status(429).json({
-        error: message || 'Too many requests, please try again later.'
-      });
-    }
-  });
+// General API rate limiter
+const apiLimiter = rateLimit({
+  store: new RedisStore({
+    client: redis,
+    prefix: 'rate-limit:api:'
+  }),
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    logger.warn(`Rate limit exceeded for IP: ${req.ip}`);
+    res.status(429).json({
+      status: 'error',
+      message: 'Too many requests, please try again later.',
+      code: 'RATE_LIMIT_EXCEEDED'
+    });
+  }
+});
 
-  return limiter;
-};
+// Auth routes rate limiter (stricter)
+const authLimiter = rateLimit({
+  store: new RedisStore({
+    client: redis,
+    prefix: 'rate-limit:auth:'
+  }),
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5, // Limit each IP to 5 login attempts per hour
+  message: 'Too many login attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    logger.warn(`Auth rate limit exceeded for IP: ${req.ip}`);
+    res.status(429).json({
+      status: 'error',
+      message: 'Too many login attempts, please try again later.',
+      code: 'AUTH_RATE_LIMIT_EXCEEDED'
+    });
+  }
+});
 
-// API rate limiter (100 requests per 15 minutes)
-const apiLimiter = createRateLimiter(
-  15 * 60 * 1000, // 15 minutes
-  100,
-  'API rate limit exceeded. Please try again later.'
-);
+// Worker routes rate limiter
+const workerLimiter = rateLimit({
+  store: new RedisStore({
+    client: redis,
+    prefix: 'rate-limit:worker:'
+  }),
+  windowMs: 60 * 1000, // 1 minute
+  max: 30, // Limit each IP to 30 requests per minute
+  message: 'Too many worker requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    logger.warn(`Worker rate limit exceeded for IP: ${req.ip}`);
+    res.status(429).json({
+      status: 'error',
+      message: 'Too many worker requests, please try again later.',
+      code: 'WORKER_RATE_LIMIT_EXCEEDED'
+    });
+  }
+});
 
-// Auth rate limiter (5 requests per minute)
-const authLimiter = createRateLimiter(
-  60 * 1000, // 1 minute
-  5,
-  'Too many login attempts. Please try again later.'
-);
-
-// Worker rate limiter (1000 requests per minute)
-const workerLimiter = createRateLimiter(
-  60 * 1000, // 1 minute
-  1000,
-  'Worker rate limit exceeded.'
-);
+// Forgot password rate limiter
+const forgotPasswordLimiter = rateLimit({
+  store: new RedisStore({
+    client: redis,
+    prefix: 'rate-limit:forgot-password:'
+  }),
+  windowMs: 24 * 60 * 60 * 1000, // 24 hours
+  max: 3, // Limit each IP to 3 forgot password attempts per day
+  message: 'Too many forgot password attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    logger.warn(`Forgot password rate limit exceeded for IP: ${req.ip}`);
+    res.status(429).json({
+      status: 'error',
+      message: 'Too many forgot password attempts, please try again later.',
+      code: 'FORGOT_PASSWORD_RATE_LIMIT_EXCEEDED'
+    });
+  }
+});
 
 module.exports = {
   apiLimiter,
   authLimiter,
-  workerLimiter
+  workerLimiter,
+  forgotPasswordLimiter
 }; 

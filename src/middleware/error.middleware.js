@@ -1,10 +1,11 @@
-const logger = require('../config/logger');
+const logger = require("../config/logger");
 
-// Custom error classes
-class AppError extends Error {
-  constructor(message, statusCode) {
+// Custom error class for API errors
+class APIError extends Error {
+  constructor(message, statusCode, code = 'INTERNAL_ERROR') {
     super(message);
     this.statusCode = statusCode;
+    this.code = code;
     this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
     this.isOperational = true;
 
@@ -12,47 +13,25 @@ class AppError extends Error {
   }
 }
 
-class ValidationError extends AppError {
-  constructor(message) {
-    super(message, 400);
-    this.name = 'ValidationError';
-  }
-}
-
-class AuthenticationError extends AppError {
-  constructor(message) {
-    super(message, 401);
-    this.name = 'AuthenticationError';
-  }
-}
-
-class AuthorizationError extends AppError {
-  constructor(message) {
-    super(message, 403);
-    this.name = 'AuthorizationError';
-  }
-}
-
-class NotFoundError extends AppError {
-  constructor(message) {
-    super(message, 404);
-    this.name = 'NotFoundError';
-  }
-}
-
-// Error handling middleware
+// Global error handler
 const errorHandler = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
   // Log error
-  logger.error('Error:', {
-    message: err.message,
-    stack: err.stack,
-    path: req.path,
-    method: req.method,
-    ip: req.ip,
-    user: req.user ? req.user.id : 'anonymous'
+  logger.error({
+    error: {
+      message: err.message,
+      stack: err.stack,
+      code: err.code,
+      statusCode: err.statusCode
+    },
+    request: {
+      method: req.method,
+      url: req.url,
+      ip: req.ip,
+      user: req.user ? req.user.id : 'anonymous'
+    }
   });
 
   // Development error response
@@ -70,40 +49,43 @@ const errorHandler = (err, req, res, next) => {
   if (err.isOperational) {
     res.status(err.statusCode).json({
       status: err.status,
-      message: err.message
+      message: err.message,
+      code: err.code
     });
     return;
   }
 
   // Programming or unknown errors
-  console.error('ERROR 💥', err);
   res.status(500).json({
     status: 'error',
-    message: 'Something went wrong!'
+    message: 'Something went wrong!',
+    code: 'INTERNAL_ERROR'
   });
 };
 
 // Handle unhandled promise rejections
 const handleUnhandledRejection = (err) => {
-  logger.error('UNHANDLED REJECTION! 💥 Shutting down...');
-  logger.error(err.name, err.message);
+  logger.error('Unhandled Rejection:', err);
+  // Give server time to finish pending requests
   process.exit(1);
 };
 
 // Handle uncaught exceptions
 const handleUncaughtException = (err) => {
-  logger.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
-  logger.error(err.name, err.message);
+  logger.error('Uncaught Exception:', err);
+  // Give server time to finish pending requests
   process.exit(1);
 };
 
+// 404 handler
+const handleNotFound = (req, res, next) => {
+  next(new APIError(`Can't find ${req.originalUrl} on this server!`, 404, 'NOT_FOUND'));
+};
+
 module.exports = {
-  AppError,
-  ValidationError,
-  AuthenticationError,
-  AuthorizationError,
-  NotFoundError,
+  APIError,
   errorHandler,
   handleUnhandledRejection,
-  handleUncaughtException
-}; 
+  handleUncaughtException,
+  handleNotFound
+};
