@@ -127,6 +127,35 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Health check endpoint with detailed status
+app.get('/api/health', async (req, res) => {
+  try {
+    const dbStatus = await sequelize.authenticate();
+    const uptime = process.uptime();
+    const memoryUsage = process.memoryUsage();
+    
+    res.status(200).json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      database: dbStatus ? 'connected' : 'disconnected',
+      uptime: `${Math.floor(uptime)} seconds`,
+      memory: {
+        heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
+        heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`,
+        external: `${Math.round(memoryUsage.external / 1024 / 1024)}MB`
+      },
+      environment: process.env.NODE_ENV,
+      version: process.env.API_VERSION || '1.0.0'
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'unhealthy',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Initialize database and start server
 const initializeApp = async () => {
   try {
@@ -140,20 +169,34 @@ const initializeApp = async () => {
     await sequelize.authenticate();
     logger.info('Database connection has been established successfully.');
     
-    // Sync database models (only in development)
+    // Handle database migrations based on environment
     if (process.env.NODE_ENV === 'development') {
-      await sequelize.sync({ alter: true });
+      // In development, use sync with force: false for safety
+      await sequelize.sync({ force: false });
       logger.info('Database models synchronized');
       
-      // Seed database if in development mode
-      const seedResult = await seedDatabase();
-      if (seedResult) {
-        logger.info('Database seeded successfully');
+      // Seed database if in development mode and SEED_DATABASE is true
+      if (process.env.SEED_DATABASE === 'true') {
+        const seedResult = await seedDatabase();
+        if (seedResult) {
+          logger.info('Database seeded successfully');
+        }
       }
     } else {
       // In production, just verify the connection
       await sequelize.authenticate();
       logger.info('Database connection verified');
+      
+      // Run migrations if AUTO_MIGRATE is enabled
+      if (process.env.AUTO_MIGRATE === 'true') {
+        try {
+          await sequelize.runMigrations();
+          logger.info('Database migrations completed successfully');
+        } catch (error) {
+          logger.error('Failed to run database migrations:', error);
+          // Don't throw error here, just log it
+        }
+      }
     }
     
     // Start server with healthcare-specific settings
@@ -205,35 +248,6 @@ const initializeApp = async () => {
     process.on('unhandledRejection', (reason, promise) => {
       logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
       gracefulShutdown('unhandledRejection');
-    });
-
-    // Health check endpoint with detailed status
-    app.get('/api/health', async (req, res) => {
-      try {
-        const dbStatus = await sequelize.authenticate();
-        const uptime = process.uptime();
-        const memoryUsage = process.memoryUsage();
-        
-        res.status(200).json({
-          status: 'healthy',
-          timestamp: new Date().toISOString(),
-          database: dbStatus ? 'connected' : 'disconnected',
-          uptime: `${Math.floor(uptime)} seconds`,
-          memory: {
-            heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
-            heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`,
-            external: `${Math.round(memoryUsage.external / 1024 / 1024)}MB`
-          },
-          environment: process.env.NODE_ENV,
-          version: process.env.API_VERSION || '1.0.0'
-        });
-      } catch (error) {
-        res.status(500).json({
-          status: 'unhealthy',
-          error: error.message,
-          timestamp: new Date().toISOString()
-        });
-      }
     });
 
   } catch (error) {

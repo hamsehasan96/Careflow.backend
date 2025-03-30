@@ -9,37 +9,50 @@ if (!fs.existsSync(migrationsDir)) {
   fs.mkdirSync(migrationsDir, { recursive: true });
 }
 
-// Parse database URL for Render
-const dbUrl = process.env.DATABASE_URL || 'postgresql://careflow_db_user:rEgSYQde9qf8GwoKCLNWT1HdsWoRjQyj@dpg-cvkmmiodl3ps738an8bg-a/careflow_db';
+// Get database configuration from environment variables
+const dbConfig = {
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 5432,
+  database: process.env.DB_NAME || 'careflow_db',
+  username: process.env.DB_USER || 'careflow_db_user',
+  password: process.env.DB_PASSWORD,
+  dialect: 'postgres'
+};
+
+// Construct database URL if DATABASE_URL is provided
+const dbUrl = process.env.DATABASE_URL || `postgresql://${dbConfig.username}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`;
+
+// Validate required environment variables
+if (!process.env.DATABASE_URL && !dbConfig.password) {
+  throw new Error('Database password is required. Please set DB_PASSWORD or DATABASE_URL environment variable.');
+}
 
 // Initialize Sequelize with database URL
 const sequelize = new Sequelize(dbUrl, {
   dialect: 'postgres',
   logging: (msg) => logger.debug(msg),
   pool: {
-    max: 20, // Increased for healthcare workload
-    min: 5,  // Keep some connections ready
-    acquire: 60000, // Increased timeout for healthcare operations
-    idle: 30000,
-    evict: 1000 // Check for idle connections every second
+    max: parseInt(process.env.DB_POOL_MAX) || 20,
+    min: parseInt(process.env.DB_POOL_MIN) || 5,
+    acquire: parseInt(process.env.DB_POOL_ACQUIRE) || 60000,
+    idle: parseInt(process.env.DB_POOL_IDLE) || 30000,
+    evict: parseInt(process.env.DB_POOL_EVICT) || 1000
   },
   define: {
     timestamps: true,
     underscored: true,
-    freezeTableName: true // Prevent table name pluralization
+    freezeTableName: true
   },
   dialectOptions: {
     ssl: process.env.NODE_ENV === 'production' ? {
       require: true,
       rejectUnauthorized: false
     } : false,
-    // Add statement timeout for long-running queries
-    statement_timeout: 30000,
-    // Add idle timeout for connections
-    idle_in_transaction_session_timeout: 30000
+    statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT) || 30000,
+    idle_in_transaction_session_timeout: parseInt(process.env.DB_IDLE_TIMEOUT) || 30000
   },
   retry: {
-    max: 5, // Increased retries for healthcare reliability
+    max: parseInt(process.env.DB_RETRY_MAX) || 5,
     match: [
       /SequelizeConnectionError/,
       /SequelizeConnectionRefusedError/,
@@ -67,7 +80,7 @@ const testConnection = async () => {
 
 // Initialize database connection with retries
 const initializeDatabase = async () => {
-  const maxRetries = 5;
+  const maxRetries = parseInt(process.env.DB_INIT_RETRIES) || 5;
   let retries = 0;
   
   while (retries < maxRetries) {
@@ -95,7 +108,7 @@ const initializeDatabase = async () => {
 // Add transaction helper for healthcare operations
 const withTransaction = async (callback) => {
   const t = await sequelize.transaction({
-    isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE // Highest isolation for healthcare data
+    isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE
   });
   
   try {
