@@ -123,6 +123,7 @@ const withTransaction = async (callback) => {
   }
 };
 
+// Export sequelize instance and helper functions
 module.exports = sequelize;
 module.exports.testConnection = testConnection;
 module.exports.initializeDatabase = initializeDatabase;

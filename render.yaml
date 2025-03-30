@@ -2,7 +2,7 @@ services:
   - type: web
     name: careflow-backend
     env: node
-    buildCommand: npm install
+    buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -41,9 +41,38 @@ services:
         value: 100
       - key: CSRF_SECRET
         generateValue: true
+      - key: SENTRY_DSN
+        value: your_sentry_dsn_here
+      - key: UPLOAD_DIR
+        value: uploads
+      - key: MAX_FILE_SIZE
+        value: 5242880
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_USER
+        value: your_email@gmail.com
+      - key: EMAIL_PASS
+        value: your_email_password
+      - key: TWILIO_ACCOUNT_SID
+        value: your_twilio_sid
+      - key: TWILIO_AUTH_TOKEN
+        value: your_twilio_token
+      - key: TWILIO_PHONE_NUMBER
+        value: your_twilio_number
     healthCheckPath: /api/health
     autoDeploy: true
     disk:
       name: uploads
       mountPath: /app/uploads
-      sizeGB: 10 
+      sizeGB: 10
+    buildFilter:
+      paths:
+        - package.json
+        - package-lock.json
+        - src/**
+        - migrations/**
+        - uploads/**
+        - .env.example
+        - render.yaml 
