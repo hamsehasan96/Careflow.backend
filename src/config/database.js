@@ -31,6 +31,17 @@ const sequelize = new Sequelize(dbUrl, {
       require: true,
       rejectUnauthorized: false
     } : false
+  },
+  retry: {
+    max: 3,
+    match: [
+      /SequelizeConnectionError/,
+      /SequelizeConnectionRefusedError/,
+      /SequelizeHostNotFoundError/,
+      /SequelizeHostNotReachableError/,
+      /SequelizeInvalidConnectionError/,
+      /SequelizeConnectionTimedOutError/
+    ]
   }
 });
 
@@ -46,5 +57,18 @@ const testConnection = async () => {
   }
 };
 
+// Initialize database connection
+const initializeDatabase = async () => {
+  try {
+    await testConnection();
+    logger.info('Database initialized successfully');
+    return true;
+  } catch (error) {
+    logger.error('Failed to initialize database:', error);
+    return false;
+  }
+};
+
 module.exports = sequelize;
 module.exports.testConnection = testConnection;
+module.exports.initializeDatabase = initializeDatabase;

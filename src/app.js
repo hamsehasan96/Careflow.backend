@@ -130,6 +130,12 @@ app.use((err, req, res, next) => {
 // Initialize database and start server
 const initializeApp = async () => {
   try {
+    // Initialize database first
+    const dbInitialized = await sequelize.initializeDatabase();
+    if (!dbInitialized) {
+      throw new Error('Failed to initialize database');
+    }
+    
     // Test database connection
     await sequelize.authenticate();
     console.log('Database connection has been established successfully.');
