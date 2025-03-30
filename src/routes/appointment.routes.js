@@ -2,6 +2,13 @@ const { body, validationResult } = require('express-validator');
 const express = require('express');
 const router = express.Router();
 const { auth, checkRole } = require('../middleware/auth.middleware');
+const {
+  getAllAppointments,
+  getAppointmentById,
+  createAppointment,
+  updateAppointment,
+  deleteAppointment
+} = require('../controllers/appointment.controller');
 
 // Placeholder for appointment controller
 // This would be implemented with actual database operations
@@ -54,10 +61,10 @@ const validate = (req, res, next) => {
 };
 
 // Routes with role-based access control
-router.get('/', auth, checkRole(['admin', 'staff']), appointmentController.getAllAppointments);
-router.get('/:id', auth, checkRole(['admin', 'staff']), appointmentController.getAppointmentById);
-router.post('/', auth, checkRole(['admin', 'staff']), appointmentValidation, validate, appointmentController.createAppointment);
-router.put('/:id', auth, checkRole(['admin', 'staff']), appointmentValidation, validate, appointmentController.updateAppointment);
-router.delete('/:id', auth, checkRole(['admin']), appointmentController.deleteAppointment);
+router.get('/', auth, checkRole(['admin', 'staff']), getAllAppointments);
+router.get('/:id', auth, checkRole(['admin', 'staff']), getAppointmentById);
+router.post('/', auth, checkRole(['admin', 'staff']), appointmentValidation, validate, createAppointment);
+router.put('/:id', auth, checkRole(['admin', 'staff']), appointmentValidation, validate, updateAppointment);
+router.delete('/:id', auth, checkRole(['admin', 'staff']), deleteAppointment);
 
 module.exports = router;

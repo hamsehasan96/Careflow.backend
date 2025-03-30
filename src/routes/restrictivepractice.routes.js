@@ -1,27 +1,34 @@
 const express = require('express');
 const router = express.Router();
 const { check } = require('express-validator');
-const restrictivePracticeController = require('../controllers/restrictivepractice.controller');
+const { 
+  getAllRestrictivePractices,
+  getParticipantRestrictivePractices,
+  getRestrictivePracticeById,
+  createRestrictivePractice,
+  updateRestrictivePractice,
+  deleteRestrictivePractice
+} = require('../controllers/restrictivepractice.controller');
 
 // Get all restrictive practices
 router.get(
   '/',
   // authMiddleware,
-  restrictivePracticeController.getAllRestrictivePractices
+  getAllRestrictivePractices
 );
 
 // Get restrictive practices for a specific participant
 router.get(
   '/participant/:participantId',
   // authMiddleware,
-  restrictivePracticeController.getParticipantRestrictivePractices
+  getParticipantRestrictivePractices
 );
 
 // Get restrictive practice by ID
 router.get(
   '/:id',
   // authMiddleware,
-  restrictivePracticeController.getRestrictivePracticeById
+  getRestrictivePracticeById
 );
 
 // Create new restrictive practice
@@ -41,14 +48,14 @@ router.post(
     check('reason', 'Reason is required').not().isEmpty(),
     check('alternativesTriedBefore', 'Alternatives tried before is required').not().isEmpty()
   ],
-  restrictivePracticeController.createRestrictivePractice
+  createRestrictivePractice
 );
 
 // Update restrictive practice
 router.put(
   '/:id',
   // authMiddleware,
-  restrictivePracticeController.updateRestrictivePractice
+  updateRestrictivePractice
 );
 
 // Submit restrictive practice report
@@ -62,7 +69,7 @@ router.put(
 router.delete(
   '/:id',
   // authMiddleware,
-  restrictivePracticeController.deleteRestrictivePractice
+  deleteRestrictivePractice
 );
 
 module.exports = router;

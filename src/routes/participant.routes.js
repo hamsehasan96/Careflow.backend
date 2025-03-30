@@ -2,6 +2,13 @@ const { body, validationResult } = require('express-validator');
 const express = require('express');
 const router = express.Router();
 const { auth, checkRole } = require('../middleware/auth.middleware');
+const {
+  getAllParticipants,
+  getParticipantById,
+  createParticipant,
+  updateParticipant,
+  deleteParticipant
+} = require('../controllers/participant.controller');
 
 // Placeholder for participant controller
 // This would be implemented with actual database operations
@@ -57,10 +64,10 @@ const validate = (req, res, next) => {
 };
 
 // Routes with role-based access control
-router.get('/', auth, checkRole(['admin', 'staff']), participantController.getAllParticipants);
-router.get('/:id', auth, checkRole(['admin', 'staff']), participantController.getParticipantById);
-router.post('/', auth, checkRole(['admin']), participantValidation, validate, participantController.createParticipant);
-router.put('/:id', auth, checkRole(['admin', 'staff']), participantValidation, validate, participantController.updateParticipant);
-router.delete('/:id', auth, checkRole(['admin']), participantController.deleteParticipant);
+router.get('/', auth, checkRole(['admin', 'staff']), getAllParticipants);
+router.get('/:id', auth, checkRole(['admin', 'staff']), getParticipantById);
+router.post('/', auth, checkRole(['admin']), participantValidation, validate, createParticipant);
+router.put('/:id', auth, checkRole(['admin', 'staff']), participantValidation, validate, updateParticipant);
+router.delete('/:id', auth, checkRole(['admin']), deleteParticipant);
 
 module.exports = router;
