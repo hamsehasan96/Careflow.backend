@@ -101,24 +101,19 @@ app.get('/api/health', async (req, res) => {
         heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
         heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`,
         external: `${Math.round(memoryUsage.external / 1024 / 1024)}MB`
-      },
-      environment: process.env.NODE_ENV,
-      version: process.env.API_VERSION || '1.0.0'
+      }
     });
   } catch (error) {
+    logger.error('Health check failed:', error);
     res.status(500).json({
       status: 'unhealthy',
-      error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      error: error.message
     });
   }
 });
 
-// Apply CSRF protection to all routes that modify data
-app.use(csrfProtection);
-app.use(handleCSRFError);
-
-// Mount API routes
+// API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/participants', participantRoutes);
 app.use('/api/appointments', appointmentRoutes);
@@ -133,40 +128,29 @@ app.use('/api/invoices', invoiceRoutes);
 app.use('/api/audit-logs', auditLogRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
-// Sentry error handler must be before any other error middleware
-app.use(monitoring.sentryErrorHandler());
-
 // Error handling middleware
-app.use((err, req, res, next) => {
-  // Log error
-  logger.error(`Error: ${err.message}`, { stack: err.stack });
-  
-  // Send error response
-  const statusCode = err.statusCode || 500;
-  res.status(statusCode).json({
-    status: 'error',
-    statusCode,
-    message: err.message,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-  });
-});
+app.use(handleValidationErrors);
+app.use(handleCSRFError);
+app.use(monitoring.sentryErrorHandler());
 
 // Initialize database and start server
 const initializeApp = async () => {
   try {
-    // Initialize database first
-    const dbInitialized = await sequelize.initializeDatabase();
-    if (!dbInitialized) {
-      throw new Error('Failed to initialize database');
-    }
-    
     // Test database connection
     await sequelize.authenticate();
     logger.info('Database connection has been established successfully.');
     
     // Load models
-    require('./models');
-    logger.info('Models loaded successfully');
+    try {
+      const models = require('./models');
+      if (!models || Object.keys(models).length === 0) {
+        throw new Error('No models were loaded successfully');
+      }
+      logger.info('Models loaded successfully');
+    } catch (error) {
+      logger.error('Failed to load models:', error);
+      throw error;
+    }
     
     // Handle database migrations based on environment
     if (process.env.NODE_ENV === 'development') {
