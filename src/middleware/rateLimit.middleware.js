@@ -1,17 +1,8 @@
 const rateLimit = require('express-rate-limit');
-const { RedisLimiter } = require('rate-limit-redis');
-const Redis = require('ioredis');
 const logger = require('../config/logger');
-
-// Redis client for rate limiting
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
 // General API rate limiter
 const apiLimiter = rateLimit({
-  store: new RedisLimiter({
-    client: redis,
-    prefix: 'rate-limit:api:'
-  }),
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
   message: 'Too many requests from this IP, please try again later.',
@@ -29,10 +20,6 @@ const apiLimiter = rateLimit({
 
 // Auth routes rate limiter (stricter)
 const authLimiter = rateLimit({
-  store: new RedisLimiter({
-    client: redis,
-    prefix: 'rate-limit:auth:'
-  }),
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5, // Limit each IP to 5 login attempts per hour
   message: 'Too many login attempts, please try again later.',
@@ -50,10 +37,6 @@ const authLimiter = rateLimit({
 
 // Worker routes rate limiter
 const workerLimiter = rateLimit({
-  store: new RedisLimiter({
-    client: redis,
-    prefix: 'rate-limit:worker:'
-  }),
   windowMs: 60 * 1000, // 1 minute
   max: 30, // Limit each IP to 30 requests per minute
   message: 'Too many worker requests, please try again later.',
@@ -71,10 +54,6 @@ const workerLimiter = rateLimit({
 
 // Forgot password rate limiter
 const forgotPasswordLimiter = rateLimit({
-  store: new RedisLimiter({
-    client: redis,
-    prefix: 'rate-limit:forgot-password:'
-  }),
   windowMs: 24 * 60 * 60 * 1000, // 24 hours
   max: 3, // Limit each IP to 3 forgot password attempts per day
   message: 'Too many forgot password attempts, please try again later.',
