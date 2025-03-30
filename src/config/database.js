@@ -9,8 +9,11 @@ if (!fs.existsSync(migrationsDir)) {
   fs.mkdirSync(migrationsDir, { recursive: true });
 }
 
-// Initialize Sequelize with environment variables
-const sequelize = new Sequelize(process.env.DATABASE_URL || process.env.DB_NAME, {
+// Parse database URL for Render
+const dbUrl = process.env.DATABASE_URL || 'postgresql://careflow_db_user:rEgSYQde9qf8GwoKCLNWT1HdsWoRjQyj@dpg-cvkmmiodl3ps738an8bg-a/careflow_db';
+
+// Initialize Sequelize with database URL
+const sequelize = new Sequelize(dbUrl, {
   dialect: 'postgres',
   logging: (msg) => logger.debug(msg),
   pool: {
