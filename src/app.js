@@ -1,5 +1,5 @@
 const seedDatabase = require('./utils/seedDatabase');
-const sequelize = require('./config/database');
+const { sequelize } = require('./config/database');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
