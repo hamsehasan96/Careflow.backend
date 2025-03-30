@@ -19,12 +19,14 @@ const dbConfig = {
   dialect: 'postgres'
 };
 
-// Construct database URL if DATABASE_URL is provided
-const dbUrl = process.env.DATABASE_URL || `postgresql://${dbConfig.username}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`;
-
-// Validate required environment variables
-if (!process.env.DATABASE_URL && !dbConfig.password) {
-  throw new Error('Database password is required. Please set DB_PASSWORD or DATABASE_URL environment variable.');
+// Parse DATABASE_URL if provided (Render's default)
+let dbUrl = process.env.DATABASE_URL;
+if (!dbUrl) {
+  // Construct database URL from individual parameters
+  if (!dbConfig.password) {
+    throw new Error('Database password is required. Please set DB_PASSWORD or DATABASE_URL environment variable.');
+  }
+  dbUrl = `postgresql://${dbConfig.username}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`;
 }
 
 // Initialize Sequelize with database URL

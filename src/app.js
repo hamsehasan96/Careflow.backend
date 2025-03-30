@@ -86,8 +86,32 @@ app.use('/api/', apiLimiter);
 app.use('/api/auth/', authLimiter);
 
 // API routes
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ message: 'CareFlow API is running' });
+app.get('/api/health', async (req, res) => {
+  try {
+    const dbStatus = await sequelize.authenticate();
+    const uptime = process.uptime();
+    const memoryUsage = process.memoryUsage();
+    
+    res.status(200).json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      database: dbStatus ? 'connected' : 'disconnected',
+      uptime: `${Math.floor(uptime)} seconds`,
+      memory: {
+        heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
+        heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`,
+        external: `${Math.round(memoryUsage.external / 1024 / 1024)}MB`
+      },
+      environment: process.env.NODE_ENV,
+      version: process.env.API_VERSION || '1.0.0'
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'unhealthy',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Apply CSRF protection to all routes that modify data
@@ -125,35 +149,6 @@ app.use((err, req, res, next) => {
     message: err.message,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
   });
-});
-
-// Health check endpoint with detailed status
-app.get('/api/health', async (req, res) => {
-  try {
-    const dbStatus = await sequelize.authenticate();
-    const uptime = process.uptime();
-    const memoryUsage = process.memoryUsage();
-    
-    res.status(200).json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      database: dbStatus ? 'connected' : 'disconnected',
-      uptime: `${Math.floor(uptime)} seconds`,
-      memory: {
-        heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
-        heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`,
-        external: `${Math.round(memoryUsage.external / 1024 / 1024)}MB`
-      },
-      environment: process.env.NODE_ENV,
-      version: process.env.API_VERSION || '1.0.0'
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'unhealthy',
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
 });
 
 // Initialize database and start server
