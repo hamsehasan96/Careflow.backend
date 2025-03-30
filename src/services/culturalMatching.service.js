@@ -1,5 +1,7 @@
 const { User, Participant, CulturalPreference } = require('../models');
 const logger = require('../config/logger');
+const aiService = require('./ai.service');
+const { Op } = require('sequelize');
 
 class CulturalMatchingService {
   async findMatchingStaff(participantId) {
@@ -15,8 +17,9 @@ class CulturalMatchingService {
         throw new Error('Participant or cultural preferences not found');
       }
 
-      const { preferredLanguage, religion } = participant.CulturalPreference;
+      const { preferredLanguage, religion, dietaryRestrictions, culturalPractices } = participant.CulturalPreference;
 
+      // Find staff with matching language and religion
       const matchingStaff = await User.findAll({
         where: {
           role: ['support_worker', 'coordinator'],
@@ -34,11 +37,67 @@ class CulturalMatchingService {
         }]
       });
 
-      return matchingStaff;
+      // Get AI analysis of cultural preferences
+      const culturalAnalysis = await aiService.analyzeCulturalPreferences({
+        preferredLanguage,
+        religion,
+        dietaryRestrictions,
+        culturalPractices
+      });
+
+      // Score and sort matches based on cultural compatibility
+      const scoredMatches = await Promise.all(matchingStaff.map(async (staff) => {
+        const staffPrefs = staff.CulturalPreference;
+        const matchScore = this.calculateMatchScore(
+          participant.CulturalPreference,
+          staffPrefs
+        );
+
+        return {
+          staff,
+          matchScore,
+          culturalAnalysis
+        };
+      }));
+
+      // Sort by match score and return top matches
+      return scoredMatches
+        .sort((a, b) => b.matchScore - a.matchScore)
+        .map(match => match.staff);
     } catch (error) {
       logger.error('Cultural matching error:', error);
       throw error;
     }
+  }
+
+  calculateMatchScore(participantPrefs, staffPrefs) {
+    let score = 0;
+    
+    // Language match (highest weight)
+    if (participantPrefs.preferredLanguage === staffPrefs.preferredLanguage) {
+      score += 40;
+    }
+
+    // Religion match
+    if (participantPrefs.religion === staffPrefs.religion) {
+      score += 30;
+    }
+
+    // Dietary restrictions compatibility
+    if (staffPrefs.dietaryRestrictions && 
+        staffPrefs.dietaryRestrictions.some(diet => 
+          participantPrefs.dietaryRestrictions.includes(diet))) {
+      score += 20;
+    }
+
+    // Cultural practices compatibility
+    if (staffPrefs.culturalPractices && 
+        staffPrefs.culturalPractices.some(practice => 
+          participantPrefs.culturalPractices.includes(practice))) {
+      score += 10;
+    }
+
+    return score;
   }
 
   async updateCulturalPreferences(participantId, preferences) {
@@ -70,8 +129,35 @@ class CulturalMatchingService {
 
       const { preferredLanguage, preferredInterpreterGender } = participant.CulturalPreference;
 
-      // TODO: Implement interpreter matching logic
-      return [];
+      // Find interpreters with matching language and gender preferences
+      const interpreters = await User.findAll({
+        where: {
+          role: 'interpreter',
+          status: 'active',
+          languages: {
+            [Op.contains]: [preferredLanguage]
+          }
+        },
+        include: [{
+          model: CulturalPreference,
+          required: true,
+          where: {
+            preferredInterpreterGender: preferredInterpreterGender
+          }
+        }]
+      });
+
+      // Get AI analysis for interpreter recommendations
+      const interpreterAnalysis = await aiService.analyzeCulturalPreferences({
+        preferredLanguage,
+        preferredInterpreterGender,
+        religion: participant.CulturalPreference.religion
+      });
+
+      return {
+        interpreters,
+        analysis: interpreterAnalysis
+      };
     } catch (error) {
       logger.error('Get interpreter recommendations error:', error);
       throw error;
