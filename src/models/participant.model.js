@@ -53,7 +53,10 @@ const Participant = sequelize.define('Participant', {
   },
   ndisNumber: {
     type: DataTypes.STRING,
-    allowNull: true
+    allowNull: true,
+    validate: {
+      is: /^[0-9]{10}$/ // NDIS numbers are 10 digits
+    }
   },
   planStartDate: {
     type: DataTypes.DATEONLY,
@@ -98,9 +101,82 @@ const Participant = sequelize.define('Participant', {
   status: {
     type: DataTypes.ENUM('active', 'inactive', 'pending'),
     defaultValue: 'active'
+  },
+  // New NDIS specific fields
+  planType: {
+    type: DataTypes.ENUM('self_managed', 'plan_managed', 'ndia_managed'),
+    allowNull: true
+  },
+  planBudget: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true
+  },
+  planReviewDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: true
+  },
+  // New elderly care specific fields
+  medicareNumber: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  pensionNumber: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  healthConditions: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  medications: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  allergies: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  mobilityLevel: {
+    type: DataTypes.ENUM('independent', 'assisted', 'dependent'),
+    allowNull: true
+  },
+  dietaryRequirements: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  preferredGP: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  preferredPharmacy: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  // Consent and privacy fields
+  privacyConsent: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  privacyConsentDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  consentToShare: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  indexes: [
+    {
+      fields: ['ndisNumber'],
+      unique: true
+    },
+    {
+      fields: ['status']
+    }
+  ]
 });
 
 module.exports = Participant;

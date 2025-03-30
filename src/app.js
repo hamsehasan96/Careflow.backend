@@ -138,48 +138,106 @@ const initializeApp = async () => {
     
     // Test database connection
     await sequelize.authenticate();
-    console.log('Database connection has been established successfully.');
+    logger.info('Database connection has been established successfully.');
     
     // Sync database models (only in development)
     if (process.env.NODE_ENV === 'development') {
       await sequelize.sync({ alter: true });
-      console.log('Database models synchronized');
+      logger.info('Database models synchronized');
       
       // Seed database if in development mode
       const seedResult = await seedDatabase();
       if (seedResult) {
-        console.log('Database seeded successfully');
+        logger.info('Database seeded successfully');
       }
     } else {
       // In production, just verify the connection
       await sequelize.authenticate();
-      console.log('Database connection verified');
+      logger.info('Database connection verified');
     }
     
-    // Start server
+    // Start server with healthcare-specific settings
     const PORT = process.env.PORT || 10000;
     const server = app.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server is running on port ${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV}`);
+      logger.info(`Server is running on port ${PORT}`);
+      logger.info(`Environment: ${process.env.NODE_ENV}`);
+      logger.info(`Healthcare API Version: ${process.env.API_VERSION || '1.0.0'}`);
     });
 
-    // Handle server errors
+    // Enhanced error handling for healthcare operations
     server.on('error', (error) => {
-      console.error('Server error:', error);
-      process.exit(1);
-    });
-
-    // Handle process termination
-    process.on('SIGTERM', () => {
-      console.log('SIGTERM received. Shutting down gracefully...');
+      logger.error('Server error:', error);
+      // Attempt graceful shutdown
       server.close(() => {
-        console.log('Server closed');
-        process.exit(0);
+        logger.info('Server closed after error');
+        process.exit(1);
       });
     });
 
+    // Handle process termination with healthcare data safety
+    const gracefulShutdown = async (signal) => {
+      logger.info(`${signal} received. Starting graceful shutdown...`);
+      
+      // Close server first
+      server.close(() => {
+        logger.info('Server closed');
+      });
+      
+      // Close database connections
+      try {
+        await sequelize.close();
+        logger.info('Database connections closed');
+      } catch (error) {
+        logger.error('Error closing database connections:', error);
+      }
+      
+      // Exit process
+      process.exit(0);
+    };
+
+    // Handle various termination signals
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+    process.on('uncaughtException', (error) => {
+      logger.error('Uncaught Exception:', error);
+      gracefulShutdown('uncaughtException');
+    });
+    process.on('unhandledRejection', (reason, promise) => {
+      logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+      gracefulShutdown('unhandledRejection');
+    });
+
+    // Health check endpoint with detailed status
+    app.get('/api/health', async (req, res) => {
+      try {
+        const dbStatus = await sequelize.authenticate();
+        const uptime = process.uptime();
+        const memoryUsage = process.memoryUsage();
+        
+        res.status(200).json({
+          status: 'healthy',
+          timestamp: new Date().toISOString(),
+          database: dbStatus ? 'connected' : 'disconnected',
+          uptime: `${Math.floor(uptime)} seconds`,
+          memory: {
+            heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
+            heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`,
+            external: `${Math.round(memoryUsage.external / 1024 / 1024)}MB`
+          },
+          environment: process.env.NODE_ENV,
+          version: process.env.API_VERSION || '1.0.0'
+        });
+      } catch (error) {
+        res.status(500).json({
+          status: 'unhealthy',
+          error: error.message,
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
   } catch (error) {
-    console.error('Unable to connect to the database or start server:', error);
+    logger.error('Unable to connect to the database or start server:', error);
     process.exit(1);
   }
 };
