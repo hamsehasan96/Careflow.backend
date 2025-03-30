@@ -44,7 +44,4 @@ sequelize.authenticate()
     process.exit(1); // Exit if database connection fails
   });
 
-module.exports = {
-  sequelize,
-  Sequelize
-};
+module.exports = sequelize;
