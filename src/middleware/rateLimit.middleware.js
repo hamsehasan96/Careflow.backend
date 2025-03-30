@@ -1,5 +1,5 @@
 const rateLimit = require('express-rate-limit');
-const RedisStore = require('rate-limit-redis');
+const { RedisLimiter } = require('rate-limit-redis');
 const Redis = require('ioredis');
 const logger = require('../config/logger');
 
@@ -8,7 +8,7 @@ const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
 // General API rate limiter
 const apiLimiter = rateLimit({
-  store: RedisStore({
+  store: new RedisLimiter({
     client: redis,
     prefix: 'rate-limit:api:'
   }),
@@ -29,7 +29,7 @@ const apiLimiter = rateLimit({
 
 // Auth routes rate limiter (stricter)
 const authLimiter = rateLimit({
-  store: RedisStore({
+  store: new RedisLimiter({
     client: redis,
     prefix: 'rate-limit:auth:'
   }),
@@ -50,7 +50,7 @@ const authLimiter = rateLimit({
 
 // Worker routes rate limiter
 const workerLimiter = rateLimit({
-  store: RedisStore({
+  store: new RedisLimiter({
     client: redis,
     prefix: 'rate-limit:worker:'
   }),
@@ -71,7 +71,7 @@ const workerLimiter = rateLimit({
 
 // Forgot password rate limiter
 const forgotPasswordLimiter = rateLimit({
-  store: RedisStore({
+  store: new RedisLimiter({
     client: redis,
     prefix: 'rate-limit:forgot-password:'
   }),
