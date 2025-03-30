@@ -2,9 +2,7 @@ services:
   - type: web
     name: careflow-backend
     env: node
-    buildCommand: |
-      npm ci
-      npm run build
+    buildCommand: NODE_ENV=production npm ci
     startCommand: |
       npm run migrate
       npm start
@@ -60,6 +58,12 @@ services:
         value: true
       - key: SEED_DATABASE
         value: false
+      - key: DB_DIALECT
+        value: postgres
+      - key: DB_PROTOCOL
+        value: postgres
+      - key: DB_SSL
+        value: true
     healthCheckPath: /health
     autoDeploy: true
     disk:
@@ -142,6 +146,9 @@ services:
       RATE_LIMIT_MAX: ${RATE_LIMIT_MAX}
       AUTO_MIGRATE: ${AUTO_MIGRATE}
       SEED_DATABASE: ${SEED_DATABASE}
+      DB_DIALECT: ${DB_DIALECT}
+      DB_PROTOCOL: ${DB_PROTOCOL}
+      DB_SSL: ${DB_SSL}
 
   - type: redis
     name: careflow-redis
@@ -154,4 +161,5 @@ databases:
     databaseName: careflow
     user: careflow
     plan: free
-    region: oregon 
+    region: oregon
+    ipAllowList: [] 

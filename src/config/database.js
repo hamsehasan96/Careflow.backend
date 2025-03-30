@@ -1,8 +1,8 @@
 const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: 'postgres',
-  protocol: 'postgres',
+  dialect: process.env.DB_DIALECT || 'postgres',
+  protocol: process.env.DB_PROTOCOL || 'postgres',
   logging: false,
   pool: {
     max: 5,
@@ -11,10 +11,10 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
     idle: 10000
   },
   dialectOptions: {
-    ssl: {
+    ssl: process.env.DB_SSL === 'true' ? {
       require: true,
       rejectUnauthorized: false, // only use false for Render/dev testing
-    },
+    } : false,
     statement_timeout: 30000, // 30 seconds
     idle_in_transaction_session_timeout: 30000
   },
@@ -41,6 +41,7 @@ sequelize.authenticate()
   })
   .catch(err => {
     console.error('Unable to connect to the database:', err);
+    process.exit(1); // Exit if database connection fails
   });
 
 module.exports = {

@@ -14,7 +14,9 @@
     "seed": "node src/utils/seedDatabase.js",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "prepare": "husky install"
+    "postinstall": "if [ \"$NODE_ENV\" != \"production\" ]; then npm run setup-husky; fi",
+    "setup-husky": "husky install",
+    "build": "echo 'No build step required'"
   },
   "keywords": [],
   "author": "",
