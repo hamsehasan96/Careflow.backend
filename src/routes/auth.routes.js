@@ -2,7 +2,7 @@ const { body, validationResult } = require('express-validator');
 const express = require('express');
 const router = express.Router();
 const { register, login, getCurrentUser, forgotPassword, resetPassword, logout } = require('../controllers/auth.controller');
-const { auth } = require('../middleware/auth.middleware');
+const { verifyToken } = require('../middleware/auth.middleware');
 
 // Validation rules
 const registerValidation = [
@@ -53,7 +53,7 @@ router.post('/register', registerValidation, validate, register);
 router.post('/login', loginValidation, validate, login);
 router.post('/forgot-password', forgotPasswordValidation, validate, forgotPassword);
 router.post('/reset-password', resetPasswordValidation, validate, resetPassword);
-router.get('/me', auth, getCurrentUser);
-router.post('/logout', auth, logout);
+router.get('/me', verifyToken, getCurrentUser);
+router.post('/logout', verifyToken, logout);
 
 module.exports = router;
