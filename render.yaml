@@ -2,7 +2,9 @@ services:
   - type: web
     name: careflow-backend
     env: node
-    buildCommand: NODE_ENV=production npm ci
+    buildCommand: |
+      npm ci
+      npm run build
     startCommand: |
       npm run migrate
       npm start
@@ -116,39 +118,6 @@ services:
       timeoutSeconds: 10
       gracePeriodSeconds: 60
       maxConsecutiveFailures: 3
-    buildCommand: |
-      npm ci
-      npm run build
-    startCommand: |
-      npm run migrate
-      npm start
-    env:
-      NODE_ENV: production
-      PORT: 3000
-      DATABASE_URL: ${DATABASE_URL}
-      REDIS_URL: ${REDIS_URL}
-      JWT_SECRET: ${JWT_SECRET}
-      WORKER_API_KEY: ${WORKER_API_KEY}
-      CSRF_SECRET: ${CSRF_SECRET}
-      SENTRY_DSN: ${SENTRY_DSN}
-      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
-      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
-      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_REGION: ${AWS_REGION}
-      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
-      CORS_ORIGIN: ${CORS_ORIGIN}
-      MAX_FILE_SIZE: ${MAX_FILE_SIZE}
-      API_VERSION: ${API_VERSION}
-      LOG_LEVEL: ${LOG_LEVEL}
-      RATE_LIMIT_WINDOW: ${RATE_LIMIT_WINDOW}
-      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX}
-      AUTO_MIGRATE: ${AUTO_MIGRATE}
-      SEED_DATABASE: ${SEED_DATABASE}
-      DB_DIALECT: ${DB_DIALECT}
-      DB_PROTOCOL: ${DB_PROTOCOL}
-      DB_SSL: ${DB_SSL}
 
   - type: redis
     name: careflow-redis
