@@ -3,6 +3,7 @@ const { sequelize } = require('./config/database');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const compression = require('compression');
 const morgan = require('morgan');
 const path = require('path');
 const logger = require('./config/logger');
@@ -37,17 +38,14 @@ const { handleValidationErrors } = require('./middleware/validation.middleware')
 // Import routes
 const authRoutes = require('./routes/auth.routes');
 const participantRoutes = require('./routes/participant.routes');
+const careWorkerRoutes = require('./routes/careWorker.routes');
 const appointmentRoutes = require('./routes/appointment.routes');
-const staffRoutes = require('./routes/staff.routes');
+const careNoteRoutes = require('./routes/careNote.routes');
+const incidentReportRoutes = require('./routes/incidentReport.routes');
 const documentRoutes = require('./routes/document.routes');
-const goalRoutes = require('./routes/goal.routes');
-const carenoteRoutes = require('./routes/carenote.routes');
-const incidentReportRoutes = require('./routes/incidentreport.routes');
-const restrictivePracticeRoutes = require('./routes/restrictivepractice.routes');
-const messageRoutes = require('./routes/message.routes');
-const invoiceRoutes = require('./routes/invoice.routes');
-const auditLogRoutes = require('./routes/auditlog.routes');
-const analyticsRoutes = require('./routes/analytics.routes');
+const reportRoutes = require('./routes/report.routes');
+const billingRoutes = require('./routes/billing.routes');
+const auditRoutes = require('./routes/audit.routes');
 
 // Initialize express app
 const app = express();
@@ -69,6 +67,9 @@ app.use(parameterProtection);
 app.use(mongoQuerySanitization);
 app.use(speedLimiter);
 
+// Compression middleware
+app.use(compression());
+
 // Performance monitoring
 app.use(performanceMiddleware);
 
@@ -77,8 +78,8 @@ app.use(cacheMiddleware());
 
 // Standard middleware
 app.use(morgan('combined', { stream: logger.stream }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Sanitization middleware
 app.use(sanitizeBody);
@@ -124,17 +125,14 @@ app.get('/api/health', async (req, res) => {
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/participants', participantRoutes);
+app.use('/api/care-workers', careWorkerRoutes);
 app.use('/api/appointments', appointmentRoutes);
-app.use('/api/staff', staffRoutes);
-app.use('/api/documents', documentRoutes);
-app.use('/api/goals', goalRoutes);
-app.use('/api/carenotes', carenoteRoutes);
+app.use('/api/care-notes', careNoteRoutes);
 app.use('/api/incident-reports', incidentReportRoutes);
-app.use('/api/restrictive-practices', restrictivePracticeRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/invoices', invoiceRoutes);
-app.use('/api/audit-logs', auditLogRoutes);
-app.use('/api/analytics', analyticsRoutes);
+app.use('/api/documents', documentRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/billing', billingRoutes);
+app.use('/api/audit', validateApiKey, auditRoutes);
 
 // Error handling middleware
 app.use(handleValidationErrors);
