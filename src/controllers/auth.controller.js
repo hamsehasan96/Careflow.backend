@@ -4,7 +4,7 @@ const { validationResult } = require('express-validator');
 const { User } = require('../models');
 
 // Register a new user
-exports.register = async (req, res) => {
+const register = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -59,7 +59,7 @@ exports.register = async (req, res) => {
 };
 
 // Login user
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -108,7 +108,7 @@ exports.login = async (req, res) => {
 };
 
 // Get current user
-exports.getCurrentUser = async (req, res) => {
+const getCurrentUser = async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
       attributes: { exclude: ['password'] }
@@ -126,7 +126,7 @@ exports.getCurrentUser = async (req, res) => {
 };
 
 // Forgot password
-exports.forgotPassword = async (req, res) => {
+const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   try {
@@ -155,7 +155,7 @@ exports.forgotPassword = async (req, res) => {
 };
 
 // Reset password
-exports.resetPassword = async (req, res) => {
+const resetPassword = async (req, res) => {
   const { token, password } = req.body;
 
   try {
@@ -186,7 +186,7 @@ exports.resetPassword = async (req, res) => {
 };
 
 // Logout user
-exports.logout = async (req, res) => {
+const logout = async (req, res) => {
   try {
     // In a stateless JWT authentication system, the client is responsible for removing the token
     // Server-side, we can just return a success message
@@ -195,4 +195,13 @@ exports.logout = async (req, res) => {
     console.error(err.message);
     res.status(500).json({ message: 'Server error' });
   }
+};
+
+module.exports = {
+  register,
+  login,
+  getCurrentUser,
+  forgotPassword,
+  resetPassword,
+  logout
 };
