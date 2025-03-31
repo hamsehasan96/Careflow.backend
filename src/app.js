@@ -44,9 +44,8 @@ const careNoteRoutes = require('./routes/careNote.routes');
 const incidentReportRoutes = require('./routes/incidentReport.routes');
 const documentRoutes = require('./routes/document.routes');
 const reportRoutes = require('./routes/report.routes');
-const invoiceRoutes = require('./routes/invoice.routes');
-const auditLogRoutes = require('./routes/auditlog.routes');
 const billingRoutes = require('./routes/billing.routes');
+const auditLogRoutes = require('./routes/auditlog.routes');
 
 // Initialize express app
 const app = express();
