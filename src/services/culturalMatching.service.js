@@ -1,6 +1,7 @@
-const { User, Participant, CulturalPreference } = require('../models');
-const logger = require('../config/logger');
-const aiService = require('./ai.service');
+const path = require('path');
+const { User, Participant, CulturalPreference } = require(path.join(__dirname, '..', 'models'));
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
+const aiService = require(path.join(__dirname, 'ai.service'));
 const { Op } = require('sequelize');
 
 class CulturalMatchingService {

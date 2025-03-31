@@ -1,18 +1,18 @@
-const seedDatabase = require('./utils/seedDatabase');
-const { sequelize } = require('./config/database');
+const path = require('path');
+const seedDatabase = require(path.join(__dirname, 'utils', 'seedDatabase'));
+const { sequelize } = require(path.join(__dirname, 'config', 'database'));
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
-const path = require('path');
-const logger = require('./config/logger');
-const monitoring = require('./config/monitoring');
-const { errorHandler, handleUnhandledRejection, handleUncaughtException } = require('./middleware/error.middleware');
-const { apiLimiter, authLimiter, workerLimiter } = require('./middleware/rateLimit.middleware');
-const { validate, sanitize, validateApiKey } = require('./middleware/validate.middleware');
-const { performanceMonitor, healthCheck } = require('./middleware/performance.middleware');
-const cacheMiddleware = require('./middleware/cache.middleware');
+const logger = require(path.join(__dirname, 'config', 'logger'));
+const monitoring = require(path.join(__dirname, 'config', 'monitoring'));
+const { errorHandler, handleUnhandledRejection, handleUncaughtException } = require(path.join(__dirname, 'middleware', 'error.middleware'));
+const { apiLimiter, authLimiter, workerLimiter } = require(path.join(__dirname, 'middleware', 'rateLimit.middleware'));
+const { validate, sanitize, validateApiKey } = require(path.join(__dirname, 'middleware', 'validate.middleware'));
+const { performanceMonitor, healthCheck } = require(path.join(__dirname, 'middleware', 'performance.middleware'));
+const cacheMiddleware = require(path.join(__dirname, 'middleware', 'cache.middleware'));
 require('dotenv').config();
 
 // Import security middleware
@@ -23,17 +23,17 @@ const {
   parameterProtection,
   mongoQuerySanitization,
   securityHeaders
-} = require('./middleware/security.middleware');
+} = require(path.join(__dirname, 'middleware', 'security.middleware'));
 
 // Import sanitization middleware
 const {
   sanitizeBody,
   sanitizeQuery,
   sanitizeParams
-} = require('./middleware/sanitization.middleware');
+} = require(path.join(__dirname, 'middleware', 'sanitization.middleware'));
 
 // Import validation middleware
-const { handleValidationErrors } = require('./middleware/validation.middleware');
+const { handleValidationErrors } = require(path.join(__dirname, 'middleware', 'validation.middleware'));
 
 // Import routes using absolute paths with __dirname
 const routesPath = path.join(__dirname, 'routes');

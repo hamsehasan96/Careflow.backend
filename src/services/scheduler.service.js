@@ -1,5 +1,6 @@
+const path = require('path');
 const cron = require('node-cron');
-const { ReminderService } = require('./reminder.service');
+const { ReminderService } = require(path.join(__dirname, 'reminder.service'));
 
 class SchedulerService {
   constructor() {
