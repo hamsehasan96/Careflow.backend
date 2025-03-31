@@ -177,7 +177,7 @@ const initializeApp = async () => {
     
     // Load models
     try {
-      const models = require('./models');
+      const models = require(path.join(__dirname, 'models'));
       if (!models || Object.keys(models).length === 0) {
         throw new Error('No models were loaded successfully');
       }
