@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { verifyToken } = require('../middleware/auth.middleware');
-const AuditLog = require('../models/auditlog.model');
+const AuditLog = require('../models/auditLog.model');
 const logger = require('../config/logger');
 
 /**

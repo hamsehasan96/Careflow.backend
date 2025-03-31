@@ -1,5 +1,5 @@
 const { validationResult } = require('express-validator');
-const CareNote = require('../models/carenote.model');
+const CareNote = require('../models/careNote.model');
 const User = require('../models/user.model');
 const Participant = require('../models/participant.model');
 

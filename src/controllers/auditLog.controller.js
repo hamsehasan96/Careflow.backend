@@ -1,5 +1,5 @@
 const { validationResult } = require('express-validator');
-const AuditLog = require('../models/auditlog.model');
+const AuditLog = require('../models/auditLog.model');
 const { Op } = require('sequelize');
 
 // Create audit log entry

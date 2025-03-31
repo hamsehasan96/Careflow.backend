@@ -1,81 +1,90 @@
 const express = require('express');
 const router = express.Router();
-const { check } = require('express-validator');
-const { 
-  getAllIncidentReports, 
-  getParticipantIncidentReports, 
-  getReporterIncidentReports, 
-  getIncidentReportById, 
-  createIncidentReport, 
-  updateIncidentReport, 
-  closeIncidentReport, 
-  deleteIncidentReport 
-} = require('../controllers/incidentreport.controller');
+const { IncidentReport } = require('../models');
+const { auth, checkRole } = require('../middleware/auth.middleware');
+const { validate } = require('../middleware/validate.middleware');
+const logger = require('../config/logger');
 
 // Get all incident reports
-router.get(
-  '/',
-  // authMiddleware,
-  getAllIncidentReports
-);
+router.get('/', auth, checkRole(['admin', 'care_worker']), async (req, res) => {
+  try {
+    const incidentReports = await IncidentReport.findAll({
+      where: req.userRole === 'admin' ? {} : { reporterId: req.userId },
+      include: ['participant', 'reporter'],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(incidentReports);
+  } catch (error) {
+    logger.error('Error fetching incident reports:', error);
+    res.status(500).json({ message: 'Error fetching incident reports' });
+  }
+});
 
-// Get incident reports for a specific participant
-router.get(
-  '/participant/:participantId',
-  // authMiddleware,
-  getParticipantIncidentReports
-);
+// Get a single incident report
+router.get('/:id', auth, checkRole(['admin', 'care_worker']), async (req, res) => {
+  try {
+    const incidentReport = await IncidentReport.findByPk(req.params.id, {
+      include: ['participant', 'reporter']
+    });
+    if (!incidentReport) {
+      return res.status(404).json({ message: 'Incident report not found' });
+    }
+    res.json(incidentReport);
+  } catch (error) {
+    logger.error('Error fetching incident report:', error);
+    res.status(500).json({ message: 'Error fetching incident report' });
+  }
+});
 
-// Get incident reports by reporter
-router.get(
-  '/reporter/:reporterId',
-  // authMiddleware,
-  getReporterIncidentReports
-);
+// Create a new incident report
+router.post('/', auth, checkRole(['care_worker']), validate, async (req, res) => {
+  try {
+    const incidentReport = await IncidentReport.create({
+      ...req.body,
+      reporterId: req.userId,
+      status: 'pending'
+    });
+    res.status(201).json(incidentReport);
+  } catch (error) {
+    logger.error('Error creating incident report:', error);
+    res.status(500).json({ message: 'Error creating incident report' });
+  }
+});
 
-// Get incident report by ID
-router.get(
-  '/:id',
-  // authMiddleware,
-  getIncidentReportById
-);
+// Update an incident report
+router.put('/:id', auth, checkRole(['admin', 'care_worker']), validate, async (req, res) => {
+  try {
+    const incidentReport = await IncidentReport.findByPk(req.params.id);
+    if (!incidentReport) {
+      return res.status(404).json({ message: 'Incident report not found' });
+    }
+    
+    // Only allow admin to change status
+    if (req.userRole !== 'admin') {
+      delete req.body.status;
+    }
+    
+    await incidentReport.update(req.body);
+    res.json(incidentReport);
+  } catch (error) {
+    logger.error('Error updating incident report:', error);
+    res.status(500).json({ message: 'Error updating incident report' });
+  }
+});
 
-// Create new incident report
-router.post(
-  '/',
-  // authMiddleware,
-  [
-    check('incidentDate', 'Incident date is required').not().isEmpty(),
-    check('incidentTime', 'Incident time is required').not().isEmpty(),
-    check('location', 'Location is required').not().isEmpty(),
-    check('incidentType', 'Incident type is required').not().isEmpty(),
-    check('severity', 'Severity is required').not().isEmpty(),
-    check('description', 'Description is required').not().isEmpty(),
-    check('immediateActions', 'Immediate actions are required').not().isEmpty(),
-    check('participantId', 'Participant ID is required').not().isEmpty()
-  ],
-  createIncidentReport
-);
-
-// Update incident report
-router.put(
-  '/:id',
-  // authMiddleware,
-  updateIncidentReport
-);
-
-// Close incident report
-router.put(
-  '/:id/close',
-  // authMiddleware,
-  closeIncidentReport
-);
-
-// Delete incident report
-router.delete(
-  '/:id',
-  // authMiddleware,
-  deleteIncidentReport
-);
+// Delete an incident report
+router.delete('/:id', auth, checkRole(['admin']), async (req, res) => {
+  try {
+    const incidentReport = await IncidentReport.findByPk(req.params.id);
+    if (!incidentReport) {
+      return res.status(404).json({ message: 'Incident report not found' });
+    }
+    await incidentReport.destroy();
+    res.json({ message: 'Incident report deleted successfully' });
+  } catch (error) {
+    logger.error('Error deleting incident report:', error);
+    res.status(500).json({ message: 'Error deleting incident report' });
+  }
+});
 
 module.exports = router;

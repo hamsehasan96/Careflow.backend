@@ -3,7 +3,7 @@ const router = express.Router();
 const { verifyToken } = require('../middleware/auth.middleware');
 const { sanitizeUserInput } = require('../middleware/sanitization.middleware');
 const logger = require('../config/logger');
-const AuditLog = require('../models/auditlog.model');
+const AuditLog = require('../models/auditLog.model');
 
 /**
  * @route GET /api/security/check-https
