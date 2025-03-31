@@ -46,6 +46,14 @@ const documentRoutes = require('./routes/document.routes');
 const reportRoutes = require('./routes/report.routes');
 const billingRoutes = require('./routes/billing.routes');
 const auditLogRoutes = require('./routes/auditLog.routes');
+const userActivityRoutes = require('./routes/userActivity.routes');
+const analyticsRoutes = require('./routes/analytics.routes');
+const goalRoutes = require('./routes/goal.routes');
+const messageRoutes = require('./routes/message.routes');
+const restrictivePracticeRoutes = require('./routes/restrictivepractice.routes');
+const staffRoutes = require('./routes/staff.routes');
+const securityRoutes = require('./routes/security.routes');
+const userRoutes = require('./routes/user.routes');
 
 // Initialize express app
 const app = express();
@@ -138,6 +146,14 @@ app.use('/api/documents', documentRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/audit', validateApiKey, auditLogRoutes);
+app.use('/api/user-activity', userActivityRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/goals', goalRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/restrictive-practices', restrictivePracticeRoutes);
+app.use('/api/staff', staffRoutes);
+app.use('/api/security', securityRoutes);
+app.use('/api/users', userRoutes);
 
 // Error handling middleware
 app.use(handleValidationErrors);
