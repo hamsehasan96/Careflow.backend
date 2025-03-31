@@ -1,10 +1,10 @@
-const { billing } = require('../config/queue');
-const logger = require('../config/logger');
-const { sequelize } = require('../config/database');
-const { Participant, CareService, Invoice, Payment } = require('../models');
+const path = require('path');
+const { billing } = require(path.join(__dirname, '..', 'config', 'queue'));
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
+const { sequelize } = require(path.join(__dirname, '..', 'config', 'database'));
+const { Participant, CareService, Invoice, Payment } = require(path.join(__dirname, '..', 'models'));
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
-const path = require('path');
 
 // Process billing jobs
 billing.process(async (job) => {
