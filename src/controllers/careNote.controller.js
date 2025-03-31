@@ -1,7 +1,9 @@
 const { validationResult } = require('express-validator');
-const CareNote = require('../models/careNote.model');
-const User = require('../models/user.model');
-const Participant = require('../models/participant.model');
+const path = require('path');
+const modelsPath = path.join(__dirname, '..', 'models');
+const CareNote = require(path.join(modelsPath, 'careNote.model'));
+const User = require(path.join(modelsPath, 'user.model'));
+const Participant = require(path.join(modelsPath, 'participant.model'));
 
 // Get all care notes
 exports.getAllCareNotes = async (req, res) => {

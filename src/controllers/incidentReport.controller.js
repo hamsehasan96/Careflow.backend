@@ -1,7 +1,9 @@
 const { validationResult } = require('express-validator');
-const IncidentReport = require('../models/incidentReport.model');
-const User = require('../models/user.model');
-const Participant = require('../models/participant.model');
+const path = require('path');
+const modelsPath = path.join(__dirname, '..', 'models');
+const IncidentReport = require(path.join(modelsPath, 'incidentReport.model'));
+const User = require(path.join(modelsPath, 'user.model'));
+const Participant = require(path.join(modelsPath, 'participant.model'));
 
 // Get all incident reports
 exports.getAllIncidentReports = async (req, res) => {
