@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
 const { verifyToken } = require('../middleware/auth.middleware');
 const { sanitizeUserInput } = require('../middleware/sanitization.middleware');
 const logger = require('../config/logger');
-const AuditLog = require('../models/auditLog.model');
+const modelsPath = path.join(__dirname, '..', 'models');
+const AuditLog = require(path.join(modelsPath, 'auditLog.model'));
 
 /**
  * @route GET /api/security/check-https

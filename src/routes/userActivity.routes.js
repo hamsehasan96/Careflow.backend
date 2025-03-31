@@ -1,8 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
+const modelsPath = path.join(__dirname, '..', 'models');
 const { verifyToken } = require('../middleware/auth.middleware');
-const AuditLog = require('../models/auditLog.model');
+const AuditLog = require(path.join(modelsPath, 'auditLog.model'));
 const logger = require('../config/logger');
+const { authenticate } = require('../middleware/auth.middleware');
+const { validateUserActivity } = require('../middleware/validate.middleware');
 
 /**
  * Middleware to create audit logs for user activity
@@ -129,6 +133,51 @@ router.get('/history', verifyToken, async (req, res) => {
       status: 'error',
       message: 'Failed to retrieve activity history'
     });
+  }
+});
+
+// Get all user activities
+router.get('/', authenticate, async (req, res) => {
+  try {
+    res.json({ message: 'Get all user activities' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get user activity by ID
+router.get('/:id', authenticate, async (req, res) => {
+  try {
+    res.json({ message: 'Get user activity by ID' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create new user activity
+router.post('/', authenticate, validateUserActivity, async (req, res) => {
+  try {
+    res.status(201).json({ message: 'Create new user activity' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update user activity
+router.put('/:id', authenticate, validateUserActivity, async (req, res) => {
+  try {
+    res.json({ message: 'Update user activity' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete user activity
+router.delete('/:id', authenticate, async (req, res) => {
+  try {
+    res.json({ message: 'Delete user activity' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

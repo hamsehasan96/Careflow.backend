@@ -2,7 +2,9 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { body } = require('express-validator');
 const logger = require('../config/logger');
-const User = require('../models/user.model');
+const path = require('path');
+const modelsPath = path.join(__dirname, '..', 'models');
+const User = require(path.join(modelsPath, 'user.model'));
 
 /**
  * Middleware to validate user registration input
