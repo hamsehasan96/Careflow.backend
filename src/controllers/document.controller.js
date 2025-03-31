@@ -1,8 +1,9 @@
 const { validationResult } = require('express-validator');
 const { sequelize } = require('../config/database');
-const Document = require('../models/document.model');
-const fs = require('fs');
 const path = require('path');
+const modelsPath = path.join(__dirname, '..', 'models');
+const Document = require(path.join(modelsPath, 'document.model'));
+const fs = require('fs');
 const multer = require('multer');
 
 // Set up storage for document uploads

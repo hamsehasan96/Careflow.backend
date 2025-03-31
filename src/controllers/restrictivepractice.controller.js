@@ -1,7 +1,9 @@
 const { validationResult } = require('express-validator');
-const RestrictivePractice = require('../models/restrictivePractice.model');
-const User = require('../models/user.model');
-const Participant = require('../models/participant.model');
+const path = require('path');
+const modelsPath = path.join(__dirname, '..', 'models');
+const RestrictivePractice = require(path.join(modelsPath, 'restrictivePractice.model'));
+const User = require(path.join(modelsPath, 'user.model'));
+const Participant = require(path.join(modelsPath, 'participant.model'));
 
 // Get all restrictive practices
 exports.getAllRestrictivePractices = async (req, res) => {

@@ -1,7 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-const User = require('../models/user.model');
+const path = require('path');
+const modelsPath = path.join(__dirname, '..', 'models');
+const User = require(path.join(modelsPath, 'user.model'));
 const { differenceInDays } = require('date-fns');
 
 // Get all staff members

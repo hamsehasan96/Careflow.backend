@@ -1,5 +1,7 @@
 const { validationResult } = require('express-validator');
-const AuditLog = require('../models/auditLog.model');
+const path = require('path');
+const modelsPath = path.join(__dirname, '..', 'models');
+const AuditLog = require(path.join(modelsPath, 'auditLog.model'));
 const { Op } = require('sequelize');
 
 // Create audit log entry

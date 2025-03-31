@@ -1,6 +1,8 @@
 const { validationResult } = require('express-validator');
-const Message = require('../models/message.model');
-const User = require('../models/user.model');
+const path = require('path');
+const modelsPath = path.join(__dirname, '..', 'models');
+const Message = require(path.join(modelsPath, 'message.model'));
+const User = require(path.join(modelsPath, 'user.model'));
 
 // Get all messages for a user (both sent and received)
 exports.getUserMessages = async (req, res) => {

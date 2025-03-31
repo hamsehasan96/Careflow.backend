@@ -1,7 +1,9 @@
 const { validationResult } = require('express-validator');
-const Appointment = require('../models/appointment.model');
-const User = require('../models/user.model');
-const Participant = require('../models/participant.model');
+const path = require('path');
+const modelsPath = path.join(__dirname, '..', 'models');
+const Appointment = require(path.join(modelsPath, 'appointment.model'));
+const User = require(path.join(modelsPath, 'user.model'));
+const Participant = require(path.join(modelsPath, 'participant.model'));
 
 // Get all appointments
 exports.getAllAppointments = async (req, res) => {

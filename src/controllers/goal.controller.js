@@ -1,5 +1,7 @@
 const { validationResult } = require('express-validator');
-const Goal = require('../models/goal.model');
+const path = require('path');
+const modelsPath = path.join(__dirname, '..', 'models');
+const Goal = require(path.join(modelsPath, 'goal.model'));
 
 // Get all goals for a participant
 exports.getParticipantGoals = async (req, res) => {
