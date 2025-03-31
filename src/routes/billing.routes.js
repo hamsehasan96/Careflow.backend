@@ -4,6 +4,7 @@ const { Invoice, InvoiceLineItem } = require('../models');
 const { auth, checkRole } = require('../middleware/auth.middleware');
 const { validate } = require('../middleware/validate.middleware');
 const logger = require('../config/logger');
+const { Parser } = require('json2csv');
 
 // Get all invoices
 router.get('/', auth, checkRole(['admin', 'manager']), async (req, res) => {
@@ -32,6 +33,21 @@ router.get('/:id', auth, checkRole(['admin', 'manager']), async (req, res) => {
   } catch (error) {
     logger.error('Error fetching invoice:', error);
     res.status(500).json({ message: 'Error fetching invoice' });
+  }
+});
+
+// Get invoices for a participant
+router.get('/participant/:participantId', auth, checkRole(['admin', 'manager']), async (req, res) => {
+  try {
+    const invoices = await Invoice.findAll({
+      where: { participantId: req.params.participantId },
+      include: ['participant', 'lineItems'],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(invoices);
+  } catch (error) {
+    logger.error('Error fetching participant invoices:', error);
+    res.status(500).json({ message: 'Error fetching participant invoices' });
   }
 });
 
@@ -76,6 +92,97 @@ router.delete('/:id', auth, checkRole(['admin']), async (req, res) => {
   } catch (error) {
     logger.error('Error deleting invoice:', error);
     res.status(500).json({ message: 'Error deleting invoice' });
+  }
+});
+
+// Send invoice
+router.put('/:id/send', auth, checkRole(['admin', 'manager']), async (req, res) => {
+  try {
+    const invoice = await Invoice.findByPk(req.params.id);
+    if (!invoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+    await invoice.update({ status: 'sent' });
+    res.json(invoice);
+  } catch (error) {
+    logger.error('Error sending invoice:', error);
+    res.status(500).json({ message: 'Error sending invoice' });
+  }
+});
+
+// Mark invoice as paid
+router.put('/:id/paid', auth, checkRole(['admin', 'manager']), async (req, res) => {
+  try {
+    const invoice = await Invoice.findByPk(req.params.id);
+    if (!invoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+    await invoice.update({ status: 'paid' });
+    res.json(invoice);
+  } catch (error) {
+    logger.error('Error marking invoice as paid:', error);
+    res.status(500).json({ message: 'Error marking invoice as paid' });
+  }
+});
+
+// Cancel invoice
+router.put('/:id/cancel', auth, checkRole(['admin', 'manager']), async (req, res) => {
+  try {
+    const invoice = await Invoice.findByPk(req.params.id);
+    if (!invoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+    await invoice.update({ status: 'cancelled' });
+    res.json(invoice);
+  } catch (error) {
+    logger.error('Error cancelling invoice:', error);
+    res.status(500).json({ message: 'Error cancelling invoice' });
+  }
+});
+
+// Generate PDF invoice
+router.get('/:id/pdf', auth, checkRole(['admin', 'manager']), async (req, res) => {
+  try {
+    const invoice = await Invoice.findByPk(req.params.id, {
+      include: ['participant', 'lineItems']
+    });
+    if (!invoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+    // TODO: Implement PDF generation
+    res.status(501).json({ message: 'PDF generation not implemented yet' });
+  } catch (error) {
+    logger.error('Error generating PDF invoice:', error);
+    res.status(500).json({ message: 'Error generating PDF invoice' });
+  }
+});
+
+// Export invoices to CSV
+router.get('/export/csv', auth, checkRole(['admin']), async (req, res) => {
+  try {
+    const invoices = await Invoice.findAll({
+      include: ['participant', 'lineItems'],
+      order: [['createdAt', 'DESC']]
+    });
+    const parser = new Parser();
+    const csv = parser.parse(invoices);
+    res.header('Content-Type', 'text/csv');
+    res.attachment('invoices.csv');
+    res.send(csv);
+  } catch (error) {
+    logger.error('Error exporting invoices to CSV:', error);
+    res.status(500).json({ message: 'Error exporting invoices to CSV' });
+  }
+});
+
+// Get NDIS support items
+router.get('/ndis/support-items', auth, checkRole(['admin', 'manager']), async (req, res) => {
+  try {
+    // TODO: Implement NDIS support items retrieval
+    res.status(501).json({ message: 'NDIS support items retrieval not implemented yet' });
+  } catch (error) {
+    logger.error('Error fetching NDIS support items:', error);
+    res.status(500).json({ message: 'Error fetching NDIS support items' });
   }
 });
 
