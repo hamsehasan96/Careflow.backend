@@ -1,5 +1,6 @@
-const { sequelize } = require('../config/database');
-const logger = require('../config/logger');
+const path = require('path');
+const { sequelize } = require(path.join(__dirname, '..', 'config', 'database'));
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 
 // In-memory fallback for metrics when Redis is unavailable
 const memoryMetrics = new Map();

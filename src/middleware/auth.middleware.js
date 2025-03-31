@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { body } = require('express-validator');
-const logger = require('../config/logger');
 const path = require('path');
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 const modelsPath = path.join(__dirname, '..', 'models');
 const User = require(path.join(modelsPath, 'user.model'));
 

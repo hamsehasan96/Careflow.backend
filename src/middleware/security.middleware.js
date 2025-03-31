@@ -1,3 +1,4 @@
+const path = require('path');
 const rateLimit = require('express-rate-limit');
 const slowDown = require('express-slow-down');
 const csrf = require('csurf');
@@ -5,7 +6,7 @@ const helmet = require('helmet');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const mongoSanitize = require('express-mongo-sanitize');
-const logger = require('../config/logger');
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 
 // Rate limiting middleware
 const apiLimiter = rateLimit({

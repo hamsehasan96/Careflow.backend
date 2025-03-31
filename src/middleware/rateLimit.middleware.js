@@ -1,5 +1,6 @@
+const path = require('path');
 const rateLimit = require('express-rate-limit');
-const logger = require('../config/logger');
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 
 // General API rate limiter
 const apiLimiter = rateLimit({

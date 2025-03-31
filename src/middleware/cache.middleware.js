@@ -1,5 +1,6 @@
 const NodeCache = require('node-cache');
-const logger = require('../config/logger');
+const path = require('path');
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 
 // Cache with 5 minutes TTL by default
 const cache = new NodeCache({ stdTTL: 300 });

@@ -1,5 +1,6 @@
+const path = require('path');
 const { validationResult } = require('express-validator');
-const logger = require('../config/logger');
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 
 // Validation middleware
 const validate = (req, res, next) => {
