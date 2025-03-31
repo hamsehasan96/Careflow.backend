@@ -35,8 +35,7 @@ const {
 // Import validation middleware
 const { handleValidationErrors } = require('./middleware/validation.middleware');
 
-// Import routes using absolute paths
-const routesPath = path.resolve(__dirname, 'routes');
+// Import routes using relative paths
 const authRoutes = require('./routes/auth.routes');
 const participantRoutes = require('./routes/participant.routes');
 const careWorkerRoutes = require('./routes/careWorker.routes');
