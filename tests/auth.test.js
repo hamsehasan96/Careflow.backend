@@ -1,7 +1,7 @@
 const request = require('supertest');
-const app = require('../src/app');
-const sequelize = require('../src/config/database');
 const path = require('path');
+const app = require(path.join(__dirname, '..', 'src', 'app'));
+const sequelize = require(path.join(__dirname, '..', 'src', 'config', 'database'));
 const modelsPath = path.join(__dirname, '..', 'src', 'models');
 const User = require(path.join(modelsPath, 'user.model'));
 const jwt = require('jsonwebtoken');

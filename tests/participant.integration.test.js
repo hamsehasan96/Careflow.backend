@@ -1,6 +1,7 @@
 const request = require('supertest');
-const app = require('../src/app');
-const { sequelize } = require('../src/models');
+const path = require('path');
+const app = require(path.join(__dirname, '..', 'src', 'app'));
+const { sequelize } = require(path.join(__dirname, '..', 'src', 'models'));
 
 describe('Participant API', () => {
   let authToken;
