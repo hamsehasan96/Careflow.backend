@@ -35,25 +35,26 @@ const {
 // Import validation middleware
 const { handleValidationErrors } = require('./middleware/validation.middleware');
 
-// Import routes
-const authRoutes = require('./routes/auth.routes');
-const participantRoutes = require('./routes/participant.routes');
-const careWorkerRoutes = require('./routes/careWorker.routes');
-const appointmentRoutes = require('./routes/appointment.routes');
-const careNoteRoutes = require('./routes/careNote.routes');
-const incidentReportRoutes = require('./routes/incidentReport.routes');
-const documentRoutes = require('./routes/document.routes');
-const reportRoutes = require('./routes/report.routes');
-const billingRoutes = require('./routes/billing.routes');
-const auditLogRoutes = require('./routes/auditLog.routes');
-const userActivityRoutes = require('./routes/userActivity.routes');
-const analyticsRoutes = require('./routes/analytics.routes');
-const goalRoutes = require('./routes/goal.routes');
-const messageRoutes = require('./routes/message.routes');
-const restrictivePracticeRoutes = require('./routes/restrictivepractice.routes');
-const staffRoutes = require('./routes/staff.routes');
-const securityRoutes = require('./routes/security.routes');
-const userRoutes = require('./routes/user.routes');
+// Import routes using path.join for better path resolution
+const routesPath = path.join(__dirname, 'routes');
+const authRoutes = require(path.join(routesPath, 'auth.routes'));
+const participantRoutes = require(path.join(routesPath, 'participant.routes'));
+const careWorkerRoutes = require(path.join(routesPath, 'careWorker.routes'));
+const appointmentRoutes = require(path.join(routesPath, 'appointment.routes'));
+const careNoteRoutes = require(path.join(routesPath, 'careNote.routes'));
+const incidentReportRoutes = require(path.join(routesPath, 'incidentReport.routes'));
+const documentRoutes = require(path.join(routesPath, 'document.routes'));
+const reportRoutes = require(path.join(routesPath, 'report.routes'));
+const billingRoutes = require(path.join(routesPath, 'billing.routes'));
+const auditLogRoutes = require(path.join(routesPath, 'auditLog.routes'));
+const userActivityRoutes = require(path.join(routesPath, 'userActivity.routes'));
+const analyticsRoutes = require(path.join(routesPath, 'analytics.routes'));
+const goalRoutes = require(path.join(routesPath, 'goal.routes'));
+const messageRoutes = require(path.join(routesPath, 'message.routes'));
+const restrictivePracticeRoutes = require(path.join(routesPath, 'restrictivepractice.routes'));
+const staffRoutes = require(path.join(routesPath, 'staff.routes'));
+const securityRoutes = require(path.join(routesPath, 'security.routes'));
+const userRoutes = require(path.join(routesPath, 'user.routes'));
 
 // Initialize express app
 const app = express();
