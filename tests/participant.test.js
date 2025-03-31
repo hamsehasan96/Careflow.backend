@@ -1,8 +1,10 @@
 const request = require('supertest');
 const app = require('../src/app');
 const sequelize = require('../src/config/database');
-const Participant = require('../src/models/participant.model');
-const User = require('../src/models/user.model');
+const path = require('path');
+const modelsPath = path.join(__dirname, '..', 'src', 'models');
+const Participant = require(path.join(modelsPath, 'participant.model'));
+const User = require(path.join(modelsPath, 'user.model'));
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
