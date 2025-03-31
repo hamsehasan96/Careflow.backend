@@ -40,12 +40,13 @@ const authRoutes = require('./routes/auth.routes');
 const participantRoutes = require('./routes/participant.routes');
 const careWorkerRoutes = require('./routes/careWorker.routes');
 const appointmentRoutes = require('./routes/appointment.routes');
-const careNoteRoutes = require('./routes/carenote.routes');
-const incidentReportRoutes = require('./routes/incidentreport.routes');
+const careNoteRoutes = require('./routes/careNote.routes');
+const incidentReportRoutes = require('./routes/incidentReport.routes');
 const documentRoutes = require('./routes/document.routes');
 const reportRoutes = require('./routes/report.routes');
+const invoiceRoutes = require('./routes/invoice.routes');
+const auditLogRoutes = require('./routes/auditlog.routes');
 const billingRoutes = require('./routes/billing.routes');
-const auditRoutes = require('./routes/audit.routes');
 
 // Initialize express app
 const app = express();
@@ -137,7 +138,7 @@ app.use('/api/incident-reports', incidentReportRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/billing', billingRoutes);
-app.use('/api/audit', validateApiKey, auditRoutes);
+app.use('/api/audit', validateApiKey, auditLogRoutes);
 
 // Error handling middleware
 app.use(handleValidationErrors);
