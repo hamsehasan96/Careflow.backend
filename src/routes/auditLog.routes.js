@@ -1,10 +1,11 @@
+const path = require('path');
 const express = require('express');
 const router = express.Router();
-const { authenticate, hasPermission } = require('../middleware/rbac.middleware');
-const { validate, handleValidationErrors } = require('../middleware/validation.middleware');
-const { sanitizeBody } = require('../middleware/sanitization.middleware');
-const { AuditLog, User } = require('../models');
-const logger = require('../config/logger');
+const { authenticate, hasPermission } = require(path.join(__dirname, '..', 'middleware', 'rbac.middleware'));
+const { validate, handleValidationErrors } = require(path.join(__dirname, '..', 'middleware', 'validation.middleware'));
+const { sanitizeBody } = require(path.join(__dirname, '..', 'middleware', 'sanitization.middleware'));
+const { AuditLog, User } = require(path.join(__dirname, '..', 'models'));
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 const { Parser } = require('json2csv');
 
 // Get audit logs with filtering and pagination

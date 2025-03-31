@@ -1,9 +1,10 @@
+const path = require('path');
 const express = require('express');
 const router = express.Router();
-const { Invoice, InvoiceLineItem } = require('../models');
-const { auth, checkRole } = require('../middleware/auth.middleware');
-const { validate } = require('../middleware/validate.middleware');
-const logger = require('../config/logger');
+const { Invoice, InvoiceLineItem } = require(path.join(__dirname, '..', 'models'));
+const { auth, checkRole } = require(path.join(__dirname, '..', 'middleware', 'auth.middleware'));
+const { validate } = require(path.join(__dirname, '..', 'middleware', 'validate.middleware'));
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 const { Parser } = require('json2csv');
 
 // Get all invoices

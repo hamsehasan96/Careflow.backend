@@ -1,8 +1,8 @@
-const { documents } = require('../config/queue');
-const logger = require('../config/logger');
+const path = require('path');
+const { documents } = require(path.join(__dirname, '..', 'config', 'queue'));
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
-const path = require('path');
 
 // Process document jobs
 documents.process(async (job) => {

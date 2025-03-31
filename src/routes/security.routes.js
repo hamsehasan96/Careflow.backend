@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-const { verifyToken } = require('../middleware/auth.middleware');
-const { sanitizeUserInput } = require('../middleware/sanitization.middleware');
-const logger = require('../config/logger');
 const modelsPath = path.join(__dirname, '..', 'models');
+const { verifyToken } = require(path.join(__dirname, '..', 'middleware', 'auth.middleware'));
+const { sanitizeUserInput } = require(path.join(__dirname, '..', 'middleware', 'sanitization.middleware'));
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 const AuditLog = require(path.join(modelsPath, 'auditLog.model'));
 
 /**

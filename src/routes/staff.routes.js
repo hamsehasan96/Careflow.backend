@@ -1,14 +1,8 @@
 const { body, validationResult } = require('express-validator');
 const express = require('express');
 const router = express.Router();
-const { auth, checkRole } = require('../middleware/auth.middleware');
-const {
-  getAllStaff,
-  getStaffById,
-  createStaff,
-  updateStaff,
-  deleteStaff
-} = require('../controllers/staff.controller');
+const path = require('path');
+const { auth, checkRole } = require(path.join(__dirname, '..', 'middleware', 'auth.middleware'));
 
 // Placeholder for staff controller
 // This would be implemented with actual database operations
@@ -64,10 +58,10 @@ const validate = (req, res, next) => {
 };
 
 // Routes with role-based access control (admin only)
-router.get('/', auth, checkRole(['admin']), getAllStaff);
-router.get('/:id', auth, checkRole(['admin']), getStaffById);
-router.post('/', auth, checkRole(['admin']), staffValidation, validate, createStaff);
-router.put('/:id', auth, checkRole(['admin']), staffValidation, validate, updateStaff);
-router.delete('/:id', auth, checkRole(['admin']), deleteStaff);
+router.get('/', auth, checkRole(['admin']), staffController.getAllStaff);
+router.get('/:id', auth, checkRole(['admin']), staffController.getStaffById);
+router.post('/', auth, checkRole(['admin']), staffValidation, validate, staffController.createStaff);
+router.put('/:id', auth, checkRole(['admin']), staffValidation, validate, staffController.updateStaff);
+router.delete('/:id', auth, checkRole(['admin']), staffController.deleteStaff);
 
 module.exports = router;

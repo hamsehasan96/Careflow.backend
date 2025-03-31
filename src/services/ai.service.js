@@ -1,5 +1,6 @@
 const { Configuration, OpenAIApi } = require('openai');
-const config = require('../config/config');
+const path = require('path');
+const config = require(path.join(__dirname, '..', 'config', 'config'));
 
 class AIService {
   constructor() {

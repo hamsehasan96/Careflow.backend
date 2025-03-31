@@ -1,4 +1,5 @@
-const { Appointment, Participant, User, CareNote } = require('../models');
+const path = require('path');
+const { Appointment, Participant, User, CareNote } = require(path.join(__dirname, '..', 'models'));
 const { Op, Sequelize } = require('sequelize');
 
 class AnalyticsService {

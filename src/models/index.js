@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const sequelize = require('../config/database');
+const sequelize = require(path.join(__dirname, '..', 'config', 'database'));
 const { DataTypes } = require('sequelize');
-const logger = require('../config/logger');
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 
 const models = {};
 

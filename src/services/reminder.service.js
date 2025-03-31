@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
-const { Appointment, User, Participant } = require('../models');
+const path = require('path');
+const { Appointment, User, Participant } = require(path.join(__dirname, '..', 'models'));
 const { Op } = require('sequelize');
 
 // Email service for sending appointment reminders

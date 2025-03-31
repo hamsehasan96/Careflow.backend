@@ -1,6 +1,7 @@
 const twilio = require('twilio');
 const nodemailer = require('nodemailer');
-const logger = require('../config/logger');
+const path = require('path');
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 
 // Initialize Twilio client
 let twilioClient;
