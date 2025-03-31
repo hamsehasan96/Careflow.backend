@@ -1,5 +1,5 @@
 const { validationResult } = require('express-validator');
-const RestrictivePractice = require('../models/restrictivepractice.model');
+const RestrictivePractice = require('../models/restrictivePractice.model');
 const User = require('../models/user.model');
 const Participant = require('../models/participant.model');
 
