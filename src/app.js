@@ -54,10 +54,6 @@ const staffRoutes = require('./routes/staff.routes');
 const analyticsRoutes = require('./routes/analytics.routes');
 const goalRoutes = require('./routes/goal.routes');
 const securityRoutes = require('./routes/security.routes');
-const invoiceRoutes = require('./routes/invoice.routes');
-const notificationRoutes = require('./routes/notification.routes');
-const emailRoutes = require('./routes/email.routes');
-const schedulerRoutes = require('./routes/scheduler.routes');
 
 // Initialize express app
 const app = express();
@@ -158,10 +154,6 @@ app.use('/api/restrictive-practices', restrictivePracticeRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/invoices', invoiceRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/emails', emailRoutes);
-app.use('/api/schedulers', schedulerRoutes);
 
 // Error handling middleware
 app.use(handleValidationErrors);
