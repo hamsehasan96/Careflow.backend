@@ -36,29 +36,29 @@ const {
 const { handleValidationErrors } = require(path.join(__dirname, 'middleware', 'validation.middleware'));
 
 // Import routes using absolute paths with __dirname
-const routesPath = path.resolve(__dirname, 'routes');
-const authRoutes = require(path.join(routesPath, 'auth.routes'));
-const participantRoutes = require(path.join(routesPath, 'participant.routes'));
-const careWorkerRoutes = require(path.join(routesPath, 'careWorker.routes'));
-const appointmentRoutes = require(path.join(routesPath, 'appointment.routes'));
-const careNoteRoutes = require(path.join(routesPath, 'careNote.routes'));
-const incidentReportRoutes = require(path.join(routesPath, 'incidentReport.routes'));
-const documentRoutes = require(path.join(routesPath, 'document.routes'));
-const reportRoutes = require(path.join(routesPath, 'report.routes'));
-const billingRoutes = require(path.join(routesPath, 'billing.routes'));
-const auditRoutes = require(path.join(routesPath, 'audit.routes'));
-const userActivityRoutes = require(path.join(routesPath, 'userActivity.routes'));
-const userRoutes = require(path.join(routesPath, 'user.routes'));
-const messageRoutes = require(path.join(routesPath, 'message.routes'));
-const restrictivePracticeRoutes = require(path.join(routesPath, 'restrictivepractice.routes'));
-const staffRoutes = require(path.join(routesPath, 'staff.routes'));
-const analyticsRoutes = require(path.join(routesPath, 'analytics.routes'));
-const goalRoutes = require(path.join(routesPath, 'goal.routes'));
-const securityRoutes = require(path.join(routesPath, 'security.routes'));
-const invoiceRoutes = require(path.join(routesPath, 'invoice.routes'));
-const notificationRoutes = require(path.join(routesPath, 'notification.routes'));
-const emailRoutes = require(path.join(routesPath, 'email.routes'));
-const schedulerRoutes = require(path.join(routesPath, 'scheduler.routes'));
+const routesPath = path.join(__dirname, 'routes');
+const authRoutes = require('./routes/auth.routes');
+const participantRoutes = require('./routes/participant.routes');
+const careWorkerRoutes = require('./routes/careWorker.routes');
+const appointmentRoutes = require('./routes/appointment.routes');
+const careNoteRoutes = require('./routes/careNote.routes');
+const incidentReportRoutes = require('./routes/incidentReport.routes');
+const documentRoutes = require('./routes/document.routes');
+const reportRoutes = require('./routes/report.routes');
+const billingRoutes = require('./routes/billing.routes');
+const auditRoutes = require('./routes/audit.routes');
+const userActivityRoutes = require('./routes/userActivity.routes');
+const userRoutes = require('./routes/user.routes');
+const messageRoutes = require('./routes/message.routes');
+const restrictivePracticeRoutes = require('./routes/restrictivepractice.routes');
+const staffRoutes = require('./routes/staff.routes');
+const analyticsRoutes = require('./routes/analytics.routes');
+const goalRoutes = require('./routes/goal.routes');
+const securityRoutes = require('./routes/security.routes');
+const invoiceRoutes = require('./routes/invoice.routes');
+const notificationRoutes = require('./routes/notification.routes');
+const emailRoutes = require('./routes/email.routes');
+const schedulerRoutes = require('./routes/scheduler.routes');
 
 // Initialize express app
 const app = express();
