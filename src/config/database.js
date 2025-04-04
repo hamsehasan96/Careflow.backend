@@ -3,10 +3,12 @@ const { Sequelize } = require('sequelize');
 // Construct database URL based on environment
 const getDatabaseUrl = () => {
   if (process.env.DATABASE_URL) {
-    // Ensure the URL is properly formatted
+    // Ensure the URL is properly formatted and includes the port
     const url = process.env.DATABASE_URL.replace(/^postgres:/, 'postgresql:');
-    console.log('Environment:', process.env.NODE_ENV);
-    console.log('Database URL (credentials hidden):', url.replace(/\/\/[^@]+@/, '//****:****@'));
+    if (!url.includes(':5432')) {
+      // Add default port if not specified
+      return url.replace(/\/$/, ':5432/');
+    }
     return url;
   }
   
@@ -19,12 +21,12 @@ const getDatabaseUrl = () => {
     DB_NAME = 'careflow'
   } = process.env;
   
-  const url = `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
-  console.log('Using fallback database URL (credentials hidden):', url.replace(/\/\/[^@]+@/, '//****:****@'));
-  return url;
+  return `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
 };
 
 const databaseUrl = getDatabaseUrl();
+console.log('Environment:', process.env.NODE_ENV);
+console.log('Database URL (credentials hidden):', databaseUrl.replace(/\/\/[^@]+@/, '//****:****@'));
 
 const sequelize = new Sequelize(databaseUrl, {
   dialect: 'postgres',
