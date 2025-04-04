@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const modelsPath = path.join(__dirname, '..', 'models');
-const { verifyToken } = require('../middleware/auth.middleware');
+const { verifyToken } = require(path.join(__dirname, '..', 'middleware', 'auth.middleware'));
 const AuditLog = require(path.join(modelsPath, 'auditLog.model'));
-const logger = require('../config/logger');
-const { authenticate } = require('../middleware/auth.middleware');
-const { validateUserActivity } = require('../middleware/validate.middleware');
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
+const { authenticate } = require(path.join(__dirname, '..', 'middleware', 'auth.middleware'));
+const { validateUserActivity } = require(path.join(__dirname, '..', 'middleware', 'validate.middleware'));
 
 /**
  * Middleware to create audit logs for user activity

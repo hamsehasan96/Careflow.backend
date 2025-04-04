@@ -6,6 +6,10 @@ const { auth, checkRole } = require(path.join(__dirname, '..', 'middleware', 'au
 const { validate } = require(path.join(__dirname, '..', 'middleware', 'validate.middleware'));
 const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 const { Parser } = require('json2csv');
+const { authenticate, hasPermission } = require(path.join(__dirname, '..', 'middleware', 'rbac.middleware'));
+const { handleValidationErrors } = require(path.join(__dirname, '..', 'middleware', 'validation.middleware'));
+const { sanitizeBody } = require(path.join(__dirname, '..', 'middleware', 'sanitization.middleware'));
+const { Billing, Participant, CareWorker } = require(path.join(__dirname, '..', 'models'));
 
 // Get all invoices
 router.get('/', auth, checkRole(['admin', 'manager']), async (req, res) => {

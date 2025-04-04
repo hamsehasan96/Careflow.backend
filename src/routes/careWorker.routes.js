@@ -1,7 +1,8 @@
+const path = require('path');
 const express = require('express');
 const router = express.Router();
-const { auth, checkRole } = require('../middleware/auth.middleware');
-const { User } = require('../models');
+const { auth, checkRole } = require(path.join(__dirname, '..', 'middleware', 'auth.middleware'));
+const { User } = require(path.join(__dirname, '..', 'models'));
 
 // Get all care workers
 router.get('/', auth, checkRole(['admin', 'manager']), async (req, res) => {

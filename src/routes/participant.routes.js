@@ -1,7 +1,12 @@
-const { body, validationResult } = require('express-validator');
+const path = require('path');
 const express = require('express');
 const router = express.Router();
-const path = require('path');
+const { authenticate, hasPermission } = require(path.join(__dirname, '..', 'middleware', 'rbac.middleware'));
+const { handleValidationErrors } = require(path.join(__dirname, '..', 'middleware', 'validation.middleware'));
+const { sanitizeBody } = require(path.join(__dirname, '..', 'middleware', 'sanitization.middleware'));
+const { Participant, CareWorker } = require(path.join(__dirname, '..', 'models'));
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
+const { body, validationResult } = require('express-validator');
 const { auth, checkRole } = require(path.join(__dirname, '..', 'middleware', 'auth.middleware'));
 
 // Placeholder for participant controller

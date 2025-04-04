@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator');
-const { sequelize } = require('../config/database');
 const path = require('path');
+const { sequelize } = require(path.join(__dirname, '..', 'config', 'database'));
 const modelsPath = path.join(__dirname, '..', 'models');
 const Document = require(path.join(modelsPath, 'document.model'));
 const fs = require('fs');

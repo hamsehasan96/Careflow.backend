@@ -3,7 +3,7 @@ const { scheduler } = require(path.join(__dirname, '..', 'config', 'queue'));
 const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 const { sequelize } = require(path.join(__dirname, '..', 'config', 'database'));
 const { Appointment, CareTask, Participant, CareWorker } = require(path.join(__dirname, '..', 'models'));
-const { notifications } = require(path.join(__dirname, 'notification.worker'));
+const { notifications } = require(path.join(__dirname, 'notification.worker.js'));
 
 // Process scheduler jobs
 scheduler.process(async (job) => {

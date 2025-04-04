@@ -1,12 +1,13 @@
+const path = require('path');
 const express = require('express');
 const router = express.Router();
-const { authenticate, hasPermission, hasRole } = require('../middleware/rbac.middleware');
-const { validate, handleValidationErrors } = require('../middleware/validation.middleware');
-const { sanitizeBody } = require('../middleware/sanitization.middleware');
-const { apiLimiter } = require('../middleware/security.middleware');
-const { User, Role } = require('../models');
-const logger = require('../config/logger');
-const { sendUserNotification } = require('../services/notification.service');
+const { authenticate, hasPermission, hasRole } = require(path.join(__dirname, '..', 'middleware', 'rbac.middleware'));
+const { validate, handleValidationErrors } = require(path.join(__dirname, '..', 'middleware', 'validation.middleware'));
+const { sanitizeBody } = require(path.join(__dirname, '..', 'middleware', 'sanitization.middleware'));
+const { apiLimiter } = require(path.join(__dirname, '..', 'middleware', 'security.middleware'));
+const { User, Role } = require(path.join(__dirname, '..', 'models'));
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
+const { sendUserNotification } = require(path.join(__dirname, '..', 'services', 'notification.service'));
 
 // Get all users (admin only)
 router.get(
@@ -249,7 +250,7 @@ router.post(
       
       // Send invitation email
       try {
-        const { sendEmail } = require('../services/notification.service');
+        const { sendEmail } = require(path.join(__dirname, '..', 'services', 'notification.service'));
         
         await sendEmail(
           email,

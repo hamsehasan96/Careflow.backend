@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const router = express.Router();
 const { check } = require('express-validator');
@@ -7,7 +8,7 @@ const {
   createGoal, 
   updateGoal, 
   deleteGoal 
-} = require('../controllers/goal.controller');
+} = require(path.join(__dirname, '..', 'controllers', 'goal.controller'));
 
 // Get all goals for a participant
 router.get(

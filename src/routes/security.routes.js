@@ -6,6 +6,10 @@ const { verifyToken } = require(path.join(__dirname, '..', 'middleware', 'auth.m
 const { sanitizeUserInput } = require(path.join(__dirname, '..', 'middleware', 'sanitization.middleware'));
 const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 const AuditLog = require(path.join(modelsPath, 'auditLog.model'));
+const { authenticate, hasPermission } = require(path.join(__dirname, '..', 'middleware', 'rbac.middleware'));
+const { validate, handleValidationErrors } = require(path.join(__dirname, '..', 'middleware', 'validation.middleware'));
+const { sanitizeBody } = require(path.join(__dirname, '..', 'middleware', 'sanitization.middleware'));
+const { SecurityIncident, User } = require(path.join(__dirname, '..', 'models'));
 
 /**
  * @route GET /api/security/check-https

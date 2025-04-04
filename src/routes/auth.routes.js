@@ -1,8 +1,9 @@
 const { body, validationResult } = require('express-validator');
 const express = require('express');
 const router = express.Router();
-const { register, login, getCurrentUser, forgotPassword, resetPassword, logout } = require('../controllers/auth.controller');
-const { auth } = require('../middleware/auth.middleware');
+const path = require('path');
+const { register, login, getCurrentUser, forgotPassword, resetPassword, logout } = require(path.join(__dirname, '..', 'controllers', 'auth.controller'));
+const { auth } = require(path.join(__dirname, '..', 'middleware', 'auth.middleware'));
 
 // Validation rules
 const registerValidation = [

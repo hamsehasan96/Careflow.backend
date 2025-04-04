@@ -1,6 +1,7 @@
+const path = require('path');
 const jwt = require('jsonwebtoken');
-const { User, Role, Permission } = require('../models');
-const logger = require('../config/logger');
+const { User, Role, Permission } = require(path.join(__dirname, '..', 'models'));
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
 
 /**
  * Middleware to authenticate user based on JWT token
@@ -130,74 +131,4 @@ const hasRole = (roles) => {
       return res.status(500).json({ message: 'Role check error' });
     }
   };
-};
-
-/**
- * Middleware to check if user has sufficient role level
- * @param {number} minLevel - Minimum role level required
- */
-const hasRoleLevel = (minLevel) => {
-  return (req, res, next) => {
-    try {
-      // Check if user is authenticated
-      if (!req.user) {
-        return res.status(401).json({ message: 'Authentication required' });
-      }
-      
-      // Check if user's role level is sufficient
-      if (!req.user.Role || req.user.Role.level < minLevel) {
-        return res.status(403).json({ 
-          message: `This action requires a role level of at least ${minLevel}`
-        });
-      }
-      
-      next();
-    } catch (error) {
-      logger.error('Role level check error:', error);
-      return res.status(500).json({ message: 'Role level check error' });
-    }
-  };
-};
-
-/**
- * Middleware to check if user owns the resource or has admin privileges
- * @param {Function} getResourceOwnerId - Function to get resource owner ID from request
- */
-const isResourceOwnerOrAdmin = (getResourceOwnerId) => {
-  return async (req, res, next) => {
-    try {
-      // Check if user is authenticated
-      if (!req.user) {
-        return res.status(401).json({ message: 'Authentication required' });
-      }
-      
-      // Admin can access any resource
-      if (req.user.Role?.name === 'admin') {
-        return next();
-      }
-      
-      // Get resource owner ID
-      const ownerId = await getResourceOwnerId(req);
-      
-      // Check if user is the resource owner
-      if (req.user.id !== ownerId) {
-        return res.status(403).json({ 
-          message: 'You do not have permission to access this resource'
-        });
-      }
-      
-      next();
-    } catch (error) {
-      logger.error('Resource ownership check error:', error);
-      return res.status(500).json({ message: 'Resource ownership check error' });
-    }
-  };
-};
-
-module.exports = {
-  authenticate,
-  hasPermission,
-  hasRole,
-  hasRoleLevel,
-  isResourceOwnerOrAdmin
 };

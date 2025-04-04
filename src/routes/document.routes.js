@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const router = express.Router();
 const { check } = require('express-validator');
@@ -8,7 +9,7 @@ const {
   uploadDocument, 
   downloadDocument, 
   deleteDocument 
-} = require('../controllers/document.controller');
+} = require(path.join(__dirname, '..', 'controllers', 'document.controller'));
 
 // Get all documents for a participant
 router.get(

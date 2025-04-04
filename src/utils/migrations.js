@@ -1,7 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 const { Sequelize } = require('sequelize');
-const logger = require('../config/logger');
+const logger = require(path.join(__dirname, '..', 'config', 'logger'));
+const sequelize = require(path.join(__dirname, '..', 'config', 'database'));
 
 // Create migrations directory
 const migrationsDir = path.join(__dirname, '../../migrations');
@@ -126,7 +127,6 @@ module.exports = {
 const runMigrations = async () => {
   try {
     const { Umzug, SequelizeStorage } = require('umzug');
-    const sequelize = require('../config/database');
     
     const umzug = new Umzug({
       migrations: {

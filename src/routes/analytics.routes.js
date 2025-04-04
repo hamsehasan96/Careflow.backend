@@ -1,6 +1,7 @@
+const path = require('path');
 const express = require('express');
 const router = express.Router();
-const { AnalyticsService } = require('../services/analytics.service');
+const { AnalyticsService } = require(path.join(__dirname, '..', 'services', 'analytics.service'));
 
 const analyticsService = new AnalyticsService();
 

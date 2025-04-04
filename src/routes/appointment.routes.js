@@ -1,14 +1,15 @@
 const { body, validationResult } = require('express-validator');
 const express = require('express');
 const router = express.Router();
-const { auth, checkRole } = require('../middleware/auth.middleware');
+const path = require('path');
+const { auth, checkRole } = require(path.join(__dirname, '..', 'middleware', 'auth.middleware'));
 const {
   getAllAppointments,
   getAppointmentById,
   createAppointment,
   updateAppointment,
   deleteAppointment
-} = require('../controllers/appointment.controller');
+} = require(path.join(__dirname, '..', 'controllers', 'appointment.controller'));
 
 // Placeholder for appointment controller
 // This would be implemented with actual database operations

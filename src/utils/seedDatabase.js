@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
-const { User, Participant, Appointment, CareNote } = require('../models');
-const sequelize = require('../config/database');
+const path = require('path');
+const { User, Participant, Appointment, CareNote } = require(path.join(__dirname, '..', 'models'));
+const sequelize = require(path.join(__dirname, '..', 'config', 'database'));
 
 // Seed data function
 const seedDatabase = async () => {

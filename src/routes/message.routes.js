@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const router = express.Router();
 const { check } = require('express-validator');
@@ -9,7 +10,7 @@ const {
   markMessageAsRead, 
   markConversationAsRead, 
   deleteMessage 
-} = require('../controllers/message.controller');
+} = require(path.join(__dirname, '..', 'controllers', 'message.controller'));
 
 // Get all messages for a user (both sent and received)
 router.get(
