@@ -18,6 +18,9 @@
     "setup-husky": "husky install",
     "build": "echo 'No build step required'"
   },
+  "engines": {
+    "node": "18.x"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
