@@ -4,7 +4,10 @@ const { Sequelize } = require('sequelize');
 const getDatabaseUrl = () => {
   if (process.env.DATABASE_URL) {
     // Ensure the URL is properly formatted
-    return process.env.DATABASE_URL.replace(/^postgres:/, 'postgresql:');
+    const url = process.env.DATABASE_URL.replace(/^postgres:/, 'postgresql:');
+    console.log('Environment:', process.env.NODE_ENV);
+    console.log('Database URL (credentials hidden):', url.replace(/\/\/[^@]+@/, '//****:****@'));
+    return url;
   }
   
   // Fallback to individual environment variables
@@ -16,16 +19,21 @@ const getDatabaseUrl = () => {
     DB_NAME = 'careflow'
   } = process.env;
   
-  return `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
+  const url = `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
+  console.log('Using fallback database URL (credentials hidden):', url.replace(/\/\/[^@]+@/, '//****:****@'));
+  return url;
 };
 
 const databaseUrl = getDatabaseUrl();
-console.log('Using database URL:', databaseUrl.replace(/\/\/[^@]+@/, '//****:****@')); // Log URL with credentials hidden
 
 const sequelize = new Sequelize(databaseUrl, {
   dialect: 'postgres',
   protocol: 'postgres',
-  logging: process.env.NODE_ENV === 'development' ? console.log : false,
+  logging: (msg) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Sequelize:', msg);
+    }
+  },
   pool: {
     max: 5,
     min: 0,
@@ -57,12 +65,22 @@ const sequelize = new Sequelize(databaseUrl, {
 });
 
 // Test connection on startup
+console.log('Attempting to connect to database...');
 sequelize.authenticate()
   .then(() => {
     console.log('Database connection has been established successfully.');
+    return sequelize.query('SELECT version();');
+  })
+  .then(([results]) => {
+    console.log('Database version:', results[0].version);
   })
   .catch(err => {
     console.error('Unable to connect to the database:', err);
+    console.error('Error details:', {
+      message: err.message,
+      code: err.code,
+      stack: err.stack
+    });
     process.exit(1);
   });
 
