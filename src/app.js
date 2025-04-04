@@ -36,17 +36,17 @@ const {
 const { handleValidationErrors } = require(path.join(__dirname, 'middleware', 'validation.middleware'));
 
 // Import routes using absolute paths with __dirname
-const routesPath = path.join(__dirname, 'routes');
+const routesPath = path.resolve('src', 'routes');
 const authRoutes = require(path.join(routesPath, 'auth.routes'));
 const participantRoutes = require(path.join(routesPath, 'participant.routes'));
 const careWorkerRoutes = require(path.join(routesPath, 'careWorker.routes'));
 const appointmentRoutes = require(path.join(routesPath, 'appointment.routes'));
-const careNoteRoutes = require(path.join(routesPath, 'carenote.routes'));
+const careNoteRoutes = require(path.join(routesPath, 'careNote.routes'));
 const incidentReportRoutes = require(path.join(routesPath, 'incidentReport.routes'));
 const documentRoutes = require(path.join(routesPath, 'document.routes'));
 const reportRoutes = require(path.join(routesPath, 'report.routes'));
 const billingRoutes = require(path.join(routesPath, 'billing.routes'));
-const auditLogRoutes = require(path.join(routesPath, 'auditLog.routes'));
+const auditRoutes = require(path.join(routesPath, 'audit.routes'));
 const userActivityRoutes = require(path.join(routesPath, 'userActivity.routes'));
 const userRoutes = require(path.join(routesPath, 'user.routes'));
 const messageRoutes = require(path.join(routesPath, 'message.routes'));
@@ -55,6 +55,10 @@ const staffRoutes = require(path.join(routesPath, 'staff.routes'));
 const analyticsRoutes = require(path.join(routesPath, 'analytics.routes'));
 const goalRoutes = require(path.join(routesPath, 'goal.routes'));
 const securityRoutes = require(path.join(routesPath, 'security.routes'));
+const invoiceRoutes = require(path.join(routesPath, 'invoice.routes'));
+const notificationRoutes = require(path.join(routesPath, 'notification.routes'));
+const emailRoutes = require(path.join(routesPath, 'email.routes'));
+const schedulerRoutes = require(path.join(routesPath, 'scheduler.routes'));
 
 // Initialize express app
 const app = express();
@@ -146,7 +150,7 @@ app.use('/api/incident-reports', incidentReportRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/billing', billingRoutes);
-app.use('/api/audit', validateApiKey, auditLogRoutes);
+app.use('/api/audit', validateApiKey, auditRoutes);
 app.use('/api/user-activity', userActivityRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/goals', goalRoutes);
@@ -155,6 +159,10 @@ app.use('/api/restrictive-practices', restrictivePracticeRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/invoices', invoiceRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/emails', emailRoutes);
+app.use('/api/schedulers', schedulerRoutes);
 
 // Error handling middleware
 app.use(handleValidationErrors);
