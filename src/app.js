@@ -36,7 +36,7 @@ const {
 const { handleValidationErrors } = require(path.join(__dirname, 'middleware', 'validation.middleware'));
 
 // Import routes using absolute paths with __dirname
-const routesPath = path.resolve(__dirname, 'routes');
+const routesPath = path.join(__dirname, '..', 'routes');
 const authRoutes = require(path.join(routesPath, 'auth.routes'));
 const participantRoutes = require(path.join(routesPath, 'participant.routes'));
 const careWorkerRoutes = require(path.join(routesPath, 'careWorker.routes'));
