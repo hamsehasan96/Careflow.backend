@@ -35,18 +35,21 @@ const {
 // Import validation middleware
 const { handleValidationErrors } = require(path.join(__dirname, 'middleware', 'validation.middleware'));
 
-// Import routes using relative paths
+// Import routes using absolute paths with __dirname
+const routesPath = path.join(__dirname, 'routes');
+
+// Import existing routes
 const authRoutes = require('./routes/auth.routes');
 const participantRoutes = require('./routes/participant.routes');
-const careWorkerRoutes = require('./routes/careWorker.routes');
+const careWorkerRoutes = require('./routes/careworker.routes');
 const appointmentRoutes = require('./routes/appointment.routes');
-const careNoteRoutes = require('./routes/careNote.routes');
-const incidentReportRoutes = require('./routes/incidentReport.routes');
+const careNoteRoutes = require('./routes/carenote.routes');
+const incidentReportRoutes = require('./routes/incidentreport.routes');
 const documentRoutes = require('./routes/document.routes');
 const reportRoutes = require('./routes/report.routes');
 const billingRoutes = require('./routes/billing.routes');
-const auditLogRoutes = require('./routes/auditLog.routes');
-const userActivityRoutes = require('./routes/userActivity.routes');
+const auditLogRoutes = require('./routes/auditlog.routes');
+const userActivityRoutes = require('./routes/useractivity.routes');
 const userRoutes = require('./routes/user.routes');
 const messageRoutes = require('./routes/message.routes');
 const restrictivePracticeRoutes = require('./routes/restrictivepractice.routes');
@@ -54,6 +57,13 @@ const staffRoutes = require('./routes/staff.routes');
 const analyticsRoutes = require('./routes/analytics.routes');
 const goalRoutes = require('./routes/goal.routes');
 const securityRoutes = require('./routes/security.routes');
+
+// Comment out missing route imports
+// These routes are not implemented yet and will be added in future updates
+// const invoiceRoutes = require('./routes/invoice.routes');
+// const notificationRoutes = require('./routes/notification.routes');
+// const emailRoutes = require('./routes/email.routes');
+// const schedulerRoutes = require('./routes/scheduler.routes');
 
 // Initialize express app
 const app = express();
@@ -154,6 +164,13 @@ app.use('/api/restrictive-practices', restrictivePracticeRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/users', userRoutes);
+
+// Comment out missing route registrations
+// These routes will be implemented in future updates
+// app.use('/api/invoices', invoiceRoutes);
+// app.use('/api/notifications', notificationRoutes);
+// app.use('/api/emails', emailRoutes);
+// app.use('/api/schedulers', schedulerRoutes);
 
 // Error handling middleware
 app.use(handleValidationErrors);
