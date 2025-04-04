@@ -1,9 +1,27 @@
 const { Sequelize } = require('sequelize');
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
+// Construct database URL based on environment
+const getDatabaseUrl = () => {
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL;
+  }
+  
+  // Fallback to individual environment variables
+  const {
+    DB_USER = 'postgres',
+    DB_PASSWORD = 'postgres',
+    DB_HOST = 'localhost',
+    DB_PORT = '5432',
+    DB_NAME = 'careflow'
+  } = process.env;
+  
+  return `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
+};
+
+const sequelize = new Sequelize(getDatabaseUrl(), {
   dialect: process.env.DB_DIALECT || 'postgres',
   protocol: process.env.DB_PROTOCOL || 'postgres',
-  logging: false,
+  logging: process.env.NODE_ENV === 'development' ? console.log : false,
   pool: {
     max: 5,
     min: 0,
@@ -11,11 +29,11 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
     idle: 10000
   },
   dialectOptions: {
-    ssl: process.env.DB_SSL === 'true' ? {
+    ssl: process.env.NODE_ENV === 'production' ? {
       require: true,
-      rejectUnauthorized: false, // only use false for Render/dev testing
+      rejectUnauthorized: false
     } : false,
-    statement_timeout: 30000, // 30 seconds
+    statement_timeout: 30000,
     idle_in_transaction_session_timeout: 30000
   },
   retry: {
@@ -41,7 +59,7 @@ sequelize.authenticate()
   })
   .catch(err => {
     console.error('Unable to connect to the database:', err);
-    process.exit(1); // Exit if database connection fails
+    process.exit(1);
   });
 
 module.exports = sequelize;
