@@ -48,7 +48,7 @@ const incidentReportRoutes = require('./routes/incidentreport.routes');
 const documentRoutes = require('./routes/document.routes');
 const reportRoutes = require('./routes/report.routes');
 const billingRoutes = require('./routes/billing.routes');
-const auditLogRoutes = require('./routes/auditlog.routes');
+// const auditLogRoutes = require('./routes/auditlog.routes');  // File doesn't exist
 const userActivityRoutes = require('./routes/useractivity.routes');
 const userRoutes = require('./routes/user.routes');
 const messageRoutes = require('./routes/message.routes');
@@ -60,6 +60,7 @@ const securityRoutes = require('./routes/security.routes');
 
 // Routes that are not yet implemented
 // const careWorkerRoutes = require('./routes/careworker.routes');
+// const auditLogRoutes = require('./routes/auditlog.routes');
 // const invoiceRoutes = require('./routes/invoice.routes');
 // const notificationRoutes = require('./routes/notification.routes');
 // const emailRoutes = require('./routes/email.routes');
@@ -155,7 +156,7 @@ app.use('/api/incident-reports', incidentReportRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/billing', billingRoutes);
-app.use('/api/audit', validateApiKey, auditLogRoutes);
+// app.use('/api/audit', validateApiKey, auditLogRoutes);  // Route commented out - file doesn't exist
 app.use('/api/user-activity', userActivityRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/goals', goalRoutes);
@@ -167,6 +168,7 @@ app.use('/api/users', userRoutes);
 
 // Future route registrations
 // app.use('/api/care-workers', careWorkerRoutes);
+// app.use('/api/audit', validateApiKey, auditLogRoutes);
 // app.use('/api/invoices', invoiceRoutes);
 // app.use('/api/notifications', notificationRoutes);
 // app.use('/api/emails', emailRoutes);
