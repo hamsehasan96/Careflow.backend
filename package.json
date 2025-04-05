@@ -19,7 +19,7 @@
     "build": "echo 'No build step required'"
   },
   "engines": {
-    "node": "18.x"
+    "node": ">=18.x <23.0.0"
   },
   "keywords": [],
   "author": "",

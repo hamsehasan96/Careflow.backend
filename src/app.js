@@ -41,7 +41,7 @@ const routesPath = path.join(__dirname, 'routes');
 // Import existing routes
 const authRoutes = require('./routes/auth.routes');
 const participantRoutes = require('./routes/participant.routes');
-const careWorkerRoutes = require('./routes/careworker.routes');
+// const careWorkerRoutes = require('./routes/careworker.routes');  // File doesn't exist
 const appointmentRoutes = require('./routes/appointment.routes');
 const careNoteRoutes = require('./routes/carenote.routes');
 const incidentReportRoutes = require('./routes/incidentreport.routes');
@@ -58,8 +58,9 @@ const analyticsRoutes = require('./routes/analytics.routes');
 const goalRoutes = require('./routes/goal.routes');
 const securityRoutes = require('./routes/security.routes');
 
-// Comment out missing route imports
-// These routes are not implemented yet and will be added in future updates
+// The following routes are commented out as their files do not exist in src/routes
+// These will be implemented in future updates
+// const careWorkerRoutes = require('./routes/careworker.routes');
 // const invoiceRoutes = require('./routes/invoice.routes');
 // const notificationRoutes = require('./routes/notification.routes');
 // const emailRoutes = require('./routes/email.routes');
@@ -148,7 +149,7 @@ app.get('/health', healthCheck);
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/participants', participantRoutes);
-app.use('/api/care-workers', careWorkerRoutes);
+// app.use('/api/care-workers', careWorkerRoutes);  // Route commented out - file doesn't exist
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/care-notes', careNoteRoutes);
 app.use('/api/incident-reports', incidentReportRoutes);
@@ -165,8 +166,9 @@ app.use('/api/staff', staffRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/users', userRoutes);
 
-// Comment out missing route registrations
-// These routes will be implemented in future updates
+// The following route registrations are commented out as their route files do not exist
+// These will be implemented in future updates
+// app.use('/api/care-workers', careWorkerRoutes);
 // app.use('/api/invoices', invoiceRoutes);
 // app.use('/api/notifications', notificationRoutes);
 // app.use('/api/emails', emailRoutes);
