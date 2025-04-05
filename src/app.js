@@ -58,8 +58,7 @@ const analyticsRoutes = require('./routes/analytics.routes');
 const goalRoutes = require('./routes/goal.routes');
 const securityRoutes = require('./routes/security.routes');
 
-// The following routes are commented out as their files do not exist in src/routes
-// These will be implemented in future updates
+// Routes that are not yet implemented
 // const careWorkerRoutes = require('./routes/careworker.routes');
 // const invoiceRoutes = require('./routes/invoice.routes');
 // const notificationRoutes = require('./routes/notification.routes');
@@ -146,10 +145,10 @@ app.use('/api/workers', workerLimiter);
 // Health check endpoint
 app.get('/health', healthCheck);
 
-// API routes
+// Register existing API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/participants', participantRoutes);
-// app.use('/api/care-workers', careWorkerRoutes);  // Route commented out - file doesn't exist
+// app.use('/api/care-workers', careWorkerRoutes);  // Commented out - route file doesn't exist
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/care-notes', careNoteRoutes);
 app.use('/api/incident-reports', incidentReportRoutes);
@@ -166,8 +165,7 @@ app.use('/api/staff', staffRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/users', userRoutes);
 
-// The following route registrations are commented out as their route files do not exist
-// These will be implemented in future updates
+// Future route registrations
 // app.use('/api/care-workers', careWorkerRoutes);
 // app.use('/api/invoices', invoiceRoutes);
 // app.use('/api/notifications', notificationRoutes);
