@@ -58,7 +58,8 @@ const staffRoutes = require('./routes/staff.routes');
 // Commented out to fix Render deployment - AnalyticsService is not a constructor
 // const analyticsRoutes = require('./routes/analytics.routes');
 const goalRoutes = require('./routes/goal.routes');
-const securityRoutes = require('./routes/security.routes');
+// Commented out to fix Render deployment - sanitizeUserInput is undefined
+// const securityRoutes = require('./routes/security.routes');
 
 // Routes that are not yet implemented
 // const userActivityRoutes = require('./routes/useractivity.routes');  // File doesn't exist
@@ -164,12 +165,13 @@ app.use('/api/messages', messageRoutes);
 // Commented out to fix Render deployment - missing restrictivePractice.model
 // app.use('/api/restrictive-practices', restrictivePracticeRoutes);
 app.use('/api/staff', staffRoutes);
-app.use('/api/security', securityRoutes);
 // Commented out to fix Render deployment - missing hasRole middleware
 // app.use('/api/users', userRoutes);
 // Commented out to fix Render deployment - AnalyticsService is not a constructor
 // app.use('/api/analytics', analyticsRoutes);
 app.use('/api/goals', goalRoutes);
+// Commented out to fix Render deployment - sanitizeUserInput is undefined
+// app.use('/api/security', securityRoutes);
 
 // Future route registrations
 // app.use('/api/user-activity', userActivityRoutes);  // Route commented out - file doesn't exist
