@@ -86,4 +86,4 @@ sequelize.authenticate()
     process.exit(1);
   });
 
-module.exports = sequelize;
+module.exports = { sequelize };
