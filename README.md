@@ -108,14 +108,30 @@ npm start
 2. Connect your GitHub repository
 3. Configure the following:
    - Build Command: `npm install`
-   - Start Command: `npm start`
-   - Environment Variables: Copy all variables from `.env.example` and set their values
+   - Start Command: `node src/app.js`
+   - Environment Variables: 
+     - `NODE_ENV`: production
+     - `DATABASE_URL`: Your Render PostgreSQL internal URL
+     - Other variables from `.env.example` as needed
 4. Add a PostgreSQL database from Render's dashboard
-5. Update the database connection variables in Render's environment variables
+5. The application will automatically connect to the database and run properly
+
+### Deployment Notes
+
+The following changes were made to ensure smooth deployment on Render:
+
+- Added proper path resolution using `path.join()` with `__dirname` in all file imports
+- Disabled auto-migrations in production to prevent foreign key constraint errors
+- Added a root route handler for health checks
+- Properly configured database connection with SSL support
+- Improved logger formatting for better debugging
+- Commented out routes with missing dependencies until they can be implemented
 
 ## Health Check
 
-The application provides a health check endpoint at `/api/health` that returns a 200 status code when the service is running properly.
+The application provides these health check endpoints:
+- Root path (`/`): Returns basic API information
+- `/health`: Detailed health check including database status
 
 ## API Documentation
 
