@@ -231,13 +231,20 @@ const initializeApp = async () => {
       
       if (process.env.AUTO_MIGRATE === 'true') {
         try {
-          // Replace runMigrations call with a simple database sync
-          // Note: In production, you should use proper migrations with Sequelize CLI
-          // This is a temporary fix
-          await sequelize.sync({ alter: true });
-          logger.info('Database schema synchronized successfully');
+          // Skip sync in production to avoid foreign key constraint errors
+          // A proper migration solution should be implemented
+          logger.info('Auto migrations are disabled in production to prevent errors.');
+          logger.info('Use a proper migration tool for production database changes.');
+          
+          // Instead of using sequelize.sync, just log the schema status
+          const [results] = await sequelize.query(`
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+          `);
+          logger.info(`Database contains ${results.length} tables`);
         } catch (error) {
-          logger.error('Failed to synchronize database schema:', error);
+          logger.error('Failed to check database schema:', error);
         }
       }
     }

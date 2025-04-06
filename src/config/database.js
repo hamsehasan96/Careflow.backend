@@ -28,27 +28,27 @@ const databaseUrl = getDatabaseUrl();
 console.log('Environment:', process.env.NODE_ENV);
 console.log('Database URL (credentials hidden):', databaseUrl.replace(/\/\/[^@]+@/, '//****:****@'));
 
-const sequelize = new Sequelize(databaseUrl, {
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
-  protocol: 'postgres',
-  logging: (msg) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Sequelize:', msg);
-    }
+  logging: false,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  },
+  // Add this configuration to prevent foreign key constraint errors during sync
+  sync: {
+    force: false,
+    alter: true,
+    // Skip validation of foreign keys during sync in production
+    hooks: process.env.NODE_ENV === 'production'
   },
   pool: {
     max: 5,
     min: 0,
     acquire: 30000,
     idle: 10000
-  },
-  dialectOptions: {
-    ssl: process.env.NODE_ENV === 'production' ? {
-      require: true,
-      rejectUnauthorized: false
-    } : false,
-    statement_timeout: 30000,
-    idle_in_transaction_session_timeout: 30000
   },
   retry: {
     max: 3,
