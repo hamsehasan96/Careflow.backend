@@ -41,15 +41,14 @@ const routesPath = path.join(__dirname, 'routes');
 // Import existing routes
 const authRoutes = require('./routes/auth.routes');
 const participantRoutes = require('./routes/participant.routes');
-// const careWorkerRoutes = require('./routes/careworker.routes');  // File doesn't exist
 const appointmentRoutes = require('./routes/appointment.routes');
 const careNoteRoutes = require('./routes/carenote.routes');
 const incidentReportRoutes = require('./routes/incidentreport.routes');
 const documentRoutes = require('./routes/document.routes');
 const reportRoutes = require('./routes/report.routes');
 const billingRoutes = require('./routes/billing.routes');
-// const auditLogRoutes = require('./routes/auditlog.routes');  // File doesn't exist
-const userActivityRoutes = require('./routes/useractivity.routes');
+// Commented out to fix Render deployment - file not implemented yet
+// const userActivityRoutes = require('./routes/useractivity.routes');
 const userRoutes = require('./routes/user.routes');
 const messageRoutes = require('./routes/message.routes');
 const restrictivePracticeRoutes = require('./routes/restrictivepractice.routes');
@@ -59,6 +58,7 @@ const goalRoutes = require('./routes/goal.routes');
 const securityRoutes = require('./routes/security.routes');
 
 // Routes that are not yet implemented
+// const userActivityRoutes = require('./routes/useractivity.routes');  // File doesn't exist
 // const careWorkerRoutes = require('./routes/careworker.routes');
 // const auditLogRoutes = require('./routes/auditlog.routes');
 // const invoiceRoutes = require('./routes/invoice.routes');
@@ -149,25 +149,26 @@ app.get('/health', healthCheck);
 // Register existing API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/participants', participantRoutes);
-// app.use('/api/care-workers', careWorkerRoutes);  // Commented out - route file doesn't exist
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/care-notes', careNoteRoutes);
 app.use('/api/incident-reports', incidentReportRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/billing', billingRoutes);
-// app.use('/api/audit', validateApiKey, auditLogRoutes);  // Route commented out - file doesn't exist
-app.use('/api/user-activity', userActivityRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/goals', goalRoutes);
+// Commented out to fix Render deployment - file not implemented yet
+// app.use('/api/user-activity', userActivityRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/restrictive-practices', restrictivePracticeRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/goals', goalRoutes);
 
 // Future route registrations
+// app.use('/api/user-activity', userActivityRoutes);  // Route commented out - file doesn't exist
 // app.use('/api/care-workers', careWorkerRoutes);
+// Commented out to fix Render deployment - file not implemented yet
 // app.use('/api/audit', validateApiKey, auditLogRoutes);
 // app.use('/api/invoices', invoiceRoutes);
 // app.use('/api/notifications', notificationRoutes);
