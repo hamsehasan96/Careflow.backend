@@ -55,7 +55,8 @@ const messageRoutes = require('./routes/message.routes');
 // Commented out to fix Render deployment - missing restrictivePractice.model
 // const restrictivePracticeRoutes = require('./routes/restrictivepractice.routes');
 const staffRoutes = require('./routes/staff.routes');
-const analyticsRoutes = require('./routes/analytics.routes');
+// Commented out to fix Render deployment - AnalyticsService is not a constructor
+// const analyticsRoutes = require('./routes/analytics.routes');
 const goalRoutes = require('./routes/goal.routes');
 const securityRoutes = require('./routes/security.routes');
 
@@ -166,7 +167,8 @@ app.use('/api/staff', staffRoutes);
 app.use('/api/security', securityRoutes);
 // Commented out to fix Render deployment - missing hasRole middleware
 // app.use('/api/users', userRoutes);
-app.use('/api/analytics', analyticsRoutes);
+// Commented out to fix Render deployment - AnalyticsService is not a constructor
+// app.use('/api/analytics', analyticsRoutes);
 app.use('/api/goals', goalRoutes);
 
 // Future route registrations
