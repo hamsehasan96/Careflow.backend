@@ -150,6 +150,17 @@ app.use('/api/workers', workerLimiter);
 // Health check endpoint
 app.get('/health', healthCheck);
 
+// Add root route handler
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Welcome to Careflow API',
+    version: process.env.API_VERSION || '1.0.0',
+    documentation: '/api/docs', // For future API documentation
+    environment: process.env.NODE_ENV
+  });
+});
+
 // Register existing API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/participants', participantRoutes);
