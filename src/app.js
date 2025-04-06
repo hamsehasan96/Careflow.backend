@@ -58,8 +58,8 @@ const staffRoutes = require('./routes/staff.routes');
 // Commented out to fix Render deployment - AnalyticsService is not a constructor
 // const analyticsRoutes = require('./routes/analytics.routes');
 const goalRoutes = require('./routes/goal.routes');
-// Commented out to fix Render deployment - sanitizeUserInput is undefined
-const securityRoutes = require('./routes/security.routes');
+// Commented out to fix Render deployment - Route.get() requires a callback function error
+// const securityRoutes = require('./routes/security.routes');
 
 // Routes that are not yet implemented
 // const userActivityRoutes = require('./routes/useractivity.routes');  // File doesn't exist
@@ -170,7 +170,7 @@ app.use('/api/staff', staffRoutes);
 // Commented out to fix Render deployment - AnalyticsService is not a constructor
 // app.use('/api/analytics', analyticsRoutes);
 app.use('/api/goals', goalRoutes);
-// Commented out to fix Render deployment - sanitizeUserInput is undefined
+// Commented out to fix Render deployment - Route.get() requires a callback function error
 // app.use('/api/security', securityRoutes);
 
 // Future route registrations
