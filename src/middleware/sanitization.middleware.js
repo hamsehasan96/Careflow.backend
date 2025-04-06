@@ -115,10 +115,32 @@ const sanitizeObject = (obj) => {
   });
 };
 
+/**
+ * Middleware to sanitize user input specifically for security routes
+ * This middleware sanitizes all input in the request body
+ */
+const sanitizeUserInput = (req, res, next) => {
+  if (!req.body) return next();
+
+  // Sanitize each field in the request body
+  Object.keys(req.body).forEach(key => {
+    if (typeof req.body[key] === 'string') {
+      // Sanitize string values
+      req.body[key] = sanitizeString(req.body[key]);
+    } else if (typeof req.body[key] === 'object' && req.body[key] !== null) {
+      // Recursively sanitize nested objects
+      sanitizeObject(req.body[key]);
+    }
+  });
+
+  next();
+};
+
 module.exports = {
   sanitizeBody,
   sanitizeQuery,
   sanitizeParams,
   sanitizeString,
-  sanitizeHtmlContent
+  sanitizeHtmlContent,
+  sanitizeUserInput
 };

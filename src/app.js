@@ -59,7 +59,7 @@ const staffRoutes = require('./routes/staff.routes');
 // const analyticsRoutes = require('./routes/analytics.routes');
 const goalRoutes = require('./routes/goal.routes');
 // Commented out to fix Render deployment - sanitizeUserInput is undefined
-// const securityRoutes = require('./routes/security.routes');
+const securityRoutes = require('./routes/security.routes');
 
 // Routes that are not yet implemented
 // const userActivityRoutes = require('./routes/useractivity.routes');  // File doesn't exist
@@ -171,7 +171,7 @@ app.use('/api/staff', staffRoutes);
 // app.use('/api/analytics', analyticsRoutes);
 app.use('/api/goals', goalRoutes);
 // Commented out to fix Render deployment - sanitizeUserInput is undefined
-// app.use('/api/security', securityRoutes);
+app.use('/api/security', securityRoutes);
 
 // Future route registrations
 // app.use('/api/user-activity', userActivityRoutes);  // Route commented out - file doesn't exist
@@ -231,10 +231,13 @@ const initializeApp = async () => {
       
       if (process.env.AUTO_MIGRATE === 'true') {
         try {
-          await sequelize.runMigrations();
-          logger.info('Database migrations completed successfully');
+          // Replace runMigrations call with a simple database sync
+          // Note: In production, you should use proper migrations with Sequelize CLI
+          // This is a temporary fix
+          await sequelize.sync({ alter: true });
+          logger.info('Database schema synchronized successfully');
         } catch (error) {
-          logger.error('Failed to run database migrations:', error);
+          logger.error('Failed to synchronize database schema:', error);
         }
       }
     }
