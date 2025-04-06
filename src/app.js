@@ -171,7 +171,7 @@ app.use('/api/staff', staffRoutes);
 // app.use('/api/analytics', analyticsRoutes);
 app.use('/api/goals', goalRoutes);
 // Commented out to fix Render deployment - sanitizeUserInput is undefined
-app.use('/api/security', securityRoutes);
+// app.use('/api/security', securityRoutes);
 
 // Future route registrations
 // app.use('/api/user-activity', userActivityRoutes);  // Route commented out - file doesn't exist
