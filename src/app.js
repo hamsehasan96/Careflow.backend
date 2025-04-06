@@ -52,7 +52,8 @@ const billingRoutes = require('./routes/billing.routes');
 // Commented out to fix Render deployment - missing hasRole middleware
 // const userRoutes = require('./routes/user.routes');
 const messageRoutes = require('./routes/message.routes');
-const restrictivePracticeRoutes = require('./routes/restrictivepractice.routes');
+// Commented out to fix Render deployment - missing restrictivePractice.model
+// const restrictivePracticeRoutes = require('./routes/restrictivepractice.routes');
 const staffRoutes = require('./routes/staff.routes');
 const analyticsRoutes = require('./routes/analytics.routes');
 const goalRoutes = require('./routes/goal.routes');
@@ -159,7 +160,8 @@ app.use('/api/billing', billingRoutes);
 // Commented out to fix Render deployment - file not implemented yet
 // app.use('/api/user-activity', userActivityRoutes);
 app.use('/api/messages', messageRoutes);
-app.use('/api/restrictive-practices', restrictivePracticeRoutes);
+// Commented out to fix Render deployment - missing restrictivePractice.model
+// app.use('/api/restrictive-practices', restrictivePracticeRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/security', securityRoutes);
 // Commented out to fix Render deployment - missing hasRole middleware
