@@ -3,6 +3,14 @@ const nextConfig = {
   reactStrictMode: true,
   images: {
     domains: ['careflow-backend.onrender.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'careflow-backend.onrender.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
   // Enable static exports
   output: 'standalone',
@@ -15,6 +23,14 @@ const nextConfig = {
           {
             key: 'Access-Control-Allow-Origin',
             value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
           },
         ],
       },
