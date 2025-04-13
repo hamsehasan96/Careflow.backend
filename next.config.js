@@ -36,6 +36,12 @@ const nextConfig = {
       },
     ];
   },
+  // Environment variables
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://careflow-backend.onrender.com',
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'https://careflow-frontend.vercel.app',
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+  },
 };
 
 module.exports = nextConfig; 
