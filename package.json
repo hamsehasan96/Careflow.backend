@@ -28,8 +28,11 @@
     "@types/react": "^19",
     "@types/react-big-calendar": "^1.16.1",
     "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
+    "eslint-plugin-react": "^7.33.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
