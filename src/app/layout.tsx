@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import type { ReactNode } from "react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -12,11 +13,11 @@ export const metadata: Metadata = {
   description: "Modern platform for NDIS service providers",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+interface RootLayoutProps {
+  children: ReactNode;
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased`}>
