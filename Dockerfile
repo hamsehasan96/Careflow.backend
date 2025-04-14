@@ -1,19 +1,21 @@
-FROM node:20-alpine
+# Use the same Node.js version as specified in package.json
+FROM node:18-alpine
 
+# Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Install dependencies first (better caching)
 COPY package*.json ./
 RUN npm ci
 
-# Copy source code
+# Copy the rest of the application
 COPY . .
 
-# Set environment variables
-ENV NODE_ENV=production
+# Build the application
+RUN npm run build
 
-# Expose port
+# Expose the port the app runs on
 EXPOSE 3000
 
-# Run migrations and start the server
-CMD ["npm", "run", "start:prod"]
+# Start the application
+CMD ["npm", "start"]
