@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
-import { NextRequestWithAuth } from 'next-auth/middleware';
+import type { NextRequest } from 'next/server';
 
-export async function middleware(request: NextRequestWithAuth) {
-  const token = await getToken({ req: request });
-  const { pathname } = request.nextUrl;
+export function middleware(request: NextRequest) {
+  const token = request.cookies.get('token')?.value;
+  const path = request.nextUrl.pathname;
 
   // Public routes that don't require authentication
   const publicRoutes = ['/auth/login', '/auth/register'];
-  if (publicRoutes.includes(pathname)) {
+  if (publicRoutes.includes(path)) {
     if (token) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
@@ -21,17 +20,15 @@ export async function middleware(request: NextRequestWithAuth) {
   }
 
   // Role-based access control
-  const userRole = token.role as string;
-  const adminRoutes = ['/admin-dashboard', '/staff', '/settings'];
-  const supportWorkerRoutes = ['/support-dashboard', '/appointments'];
-  const participantRoutes = ['/participant-dashboard'];
-
-  if (
-    (adminRoutes.includes(pathname) && userRole !== 'admin') ||
-    (supportWorkerRoutes.includes(pathname) && userRole !== 'support_worker') ||
-    (participantRoutes.includes(pathname) && userRole !== 'participant')
-  ) {
-    return NextResponse.redirect(new URL('/unauthorized', request.url));
+  const userRole = request.cookies.get('userRole')?.value;
+  if (path.startsWith('/dashboard/admin') && userRole !== 'admin') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+  if (path.startsWith('/dashboard/support') && userRole !== 'support_worker') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+  if (path.startsWith('/dashboard/participant') && userRole !== 'participant') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();
@@ -39,13 +36,7 @@ export async function middleware(request: NextRequestWithAuth) {
 
 export const config = {
   matcher: [
-    '/admin-dashboard/:path*',
-    '/support-dashboard/:path*',
-    '/participant-dashboard/:path*',
-    '/appointments/:path*',
-    '/staff/:path*',
-    '/settings/:path*',
-    '/auth/login',
-    '/auth/register',
+    '/dashboard/:path*',
+    '/auth/:path*',
   ],
 }; 
