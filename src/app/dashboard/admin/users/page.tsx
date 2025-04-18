@@ -1,26 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import apiClient from '@/lib/api/client';
+import { useEffect, useState } from 'react';
+import { userService, User } from '@/services/userService';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'support_worker' | 'participant';
-  status: 'active' | 'inactive';
-}
-
-export default function UsersPage() {
+export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [newUser, setNewUser] = useState({
-    name: '',
-    email: '',
-    role: 'support_worker' as const,
-    password: '',
-  });
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -28,123 +17,123 @@ export default function UsersPage() {
 
   const fetchUsers = async () => {
     try {
-      const response = await apiClient.get('/users');
-      setUsers(response.data);
-      setError(null);
+      const data = await userService.getUsers();
+      setUsers(data);
     } catch (err) {
-      setError('Failed to load users');
+      setError('Failed to fetch users');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateUser = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleUpdateRole = async (userId: string, role: User['role']) => {
     try {
-      await apiClient.post('/users', newUser);
-      setNewUser({ name: '', email: '', role: 'support_worker', password: '' });
-      fetchUsers();
+      await userService.updateUserRole(userId, role);
+      await fetchUsers();
+      setShowRoleModal(false);
     } catch (err) {
-      setError('Failed to create user');
+      setError('Failed to update user role');
     }
   };
 
-  const handleUpdateUser = async (userId: string, updates: Partial<User>) => {
+  const handleDeactivateUser = async (userId: string) => {
     try {
-      await apiClient.put(`/users/${userId}`, updates);
-      fetchUsers();
+      await userService.deactivateUser(userId);
+      await fetchUsers();
     } catch (err) {
-      setError('Failed to update user');
+      setError('Failed to deactivate user');
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
+  const handleResetPassword = async (userId: string) => {
     try {
-      await apiClient.delete(`/users/${userId}`);
-      fetchUsers();
+      await userService.resetPassword(userId);
+      setShowResetModal(false);
     } catch (err) {
-      setError('Failed to delete user');
+      setError('Failed to reset password');
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-      </div>
-    );
-  }
+  if (loading) return <div className="p-4">Loading...</div>;
+  if (error) return <div className="p-4 text-red-500">{error}</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Users Management</h1>
-        <button
-          onClick={() => document.getElementById('createUserModal')?.showModal()}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-        >
-          Add New User
-        </button>
-      </div>
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
-        </div>
-      )}
-
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Staff Management</h1>
+      
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white">
+          <thead>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Email
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Role
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody>
             {users.map((user) => (
               <tr key={user.id}>
-                <td className="px-6 py-4 whitespace-nowrap">{user.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.role}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  {user.name}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  {user.email}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  {user.role}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                   <span
                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       user.status === 'active'
                         ? 'bg-green-100 text-green-800'
+                        : user.status === 'pending'
+                        ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-red-100 text-red-800'
                     }`}
                   >
                     {user.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 text-right text-sm font-medium">
                   <button
-                    onClick={() => handleUpdateUser(user.id, { status: user.status === 'active' ? 'inactive' : 'active' })}
+                    onClick={() => {
+                      setSelectedUser(user);
+                      setShowRoleModal(true);
+                    }}
                     className="text-indigo-600 hover:text-indigo-900 mr-4"
                   >
-                    {user.status === 'active' ? 'Deactivate' : 'Activate'}
+                    Change Role
                   </button>
                   <button
-                    onClick={() => handleDeleteUser(user.id)}
-                    className="text-red-600 hover:text-red-900"
+                    onClick={() => {
+                      setSelectedUser(user);
+                      setShowResetModal(true);
+                    }}
+                    className="text-indigo-600 hover:text-indigo-900 mr-4"
                   >
-                    Delete
+                    Reset Password
                   </button>
+                  {user.status === 'active' && (
+                    <button
+                      onClick={() => handleDeactivateUser(user.id)}
+                      className="text-red-600 hover:text-red-900"
+                    >
+                      Deactivate
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -152,66 +141,55 @@ export default function UsersPage() {
         </table>
       </div>
 
-      <dialog id="createUserModal" className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg mb-4">Create New User</h3>
-          <form onSubmit={handleCreateUser} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Name</label>
-              <input
-                type="text"
-                value={newUser.name}
-                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input
-                type="email"
-                value={newUser.email}
-                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Role</label>
-              <select
-                value={newUser.role}
-                onChange={(e) => setNewUser({ ...newUser, role: e.target.value as 'support_worker' })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              >
-                <option value="support_worker">Support Worker</option>
-                <option value="participant">Participant</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
-              <input
-                type="password"
-                value={newUser.password}
-                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                required
-              />
-            </div>
-            <div className="modal-action">
-              <button type="submit" className="btn btn-primary">
-                Create User
-              </button>
+      {/* Role Change Modal */}
+      {showRoleModal && selectedUser && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg">
+            <h3 className="text-lg font-medium mb-4">Change User Role</h3>
+            <select
+              value={selectedUser.role}
+              onChange={(e) => handleUpdateRole(selectedUser.id, e.target.value as User['role'])}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            >
+              <option value="admin">Admin</option>
+              <option value="support_worker">Support Worker</option>
+            </select>
+            <div className="mt-4 flex justify-end">
               <button
-                type="button"
-                className="btn"
-                onClick={() => document.getElementById('createUserModal')?.close()}
+                onClick={() => setShowRoleModal(false)}
+                className="px-4 py-2 text-gray-700 hover:text-gray-900"
               >
                 Cancel
               </button>
             </div>
-          </form>
+          </div>
         </div>
-      </dialog>
+      )}
+
+      {/* Reset Password Modal */}
+      {showResetModal && selectedUser && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg">
+            <h3 className="text-lg font-medium mb-4">Reset Password</h3>
+            <p className="mb-4">Are you sure you want to reset the password for {selectedUser.name}?</p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="px-4 py-2 text-gray-700 hover:text-gray-900 mr-4"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleResetPassword(selectedUser.id)}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Reset Password
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
+} 
 } 
