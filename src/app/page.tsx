@@ -1,7 +1,10 @@
+'use client';
+
 import Link from "next/link";
 import { HeartPulse } from "lucide-react";
+import { ReactElement } from "react";
 
-export default function Home() {
+export default function Home(): ReactElement {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 p-4">
       <div className="text-center space-y-8 max-w-2xl">
