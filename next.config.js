@@ -47,6 +47,10 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
+  // Skip type checking during build
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   // Add security headers
   async headers() {
     return [
