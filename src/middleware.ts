@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
-  const token = request.cookies.get('token')?.value;
-  const path = request.nextUrl.pathname;
+export default async function middleware(request: NextRequest) {
+  const token = await getToken({ req: request });
+  const { pathname } = request.nextUrl;
 
   // Public routes that don't require authentication
   const publicRoutes = ['/auth/login', '/auth/register'];
-  if (publicRoutes.includes(path)) {
+  if (publicRoutes.includes(pathname)) {
     if (token) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
@@ -20,15 +21,29 @@ export function middleware(request: NextRequest) {
   }
 
   // Role-based access control
-  const userRole = request.cookies.get('userRole')?.value;
-  if (path.startsWith('/dashboard/admin') && userRole !== 'admin') {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  const userRole = token.role;
+  const adminRoutes = ['/dashboard/staff', '/dashboard/clients'];
+  const supportRoutes = ['/dashboard/support'];
+  const participantRoutes = ['/dashboard/participant'];
+
+  if (userRole === 'admin') {
+    // Admin can access all routes
+    return NextResponse.next();
   }
-  if (path.startsWith('/dashboard/support') && userRole !== 'support_worker') {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+
+  if (userRole === 'support_worker') {
+    if (adminRoutes.some(route => pathname.startsWith(route))) {
+      return NextResponse.redirect(new URL('/dashboard/support', request.url));
+    }
+    return NextResponse.next();
   }
-  if (path.startsWith('/dashboard/participant') && userRole !== 'participant') {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+
+  if (userRole === 'participant') {
+    if (adminRoutes.some(route => pathname.startsWith(route)) || 
+        supportRoutes.some(route => pathname.startsWith(route))) {
+      return NextResponse.redirect(new URL('/dashboard/participant', request.url));
+    }
+    return NextResponse.next();
   }
 
   return NextResponse.next();
