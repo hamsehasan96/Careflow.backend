@@ -1,24 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { messageService, Message, MessageFilters } from '@/services/messageService';
+import { useEffect, useState, useCallback } from 'react';
+import { messageService } from '@/services/messageService';
+import type { Message, MessageFilters, NewMessage } from '@/types/message';
 
 export default function SupportMessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<MessageFilters>({});
-  const [newMessage, setNewMessage] = useState({
+  const [newMessage, setNewMessage] = useState<NewMessage>({
     content: '',
+    senderId: '',
+    recipientId: '',
     participantId: '',
     appointmentId: ''
   });
 
-  useEffect(() => {
-    fetchMessages();
-  }, [filters]);
-
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
       const data = await messageService.getMessages(filters);
       setMessages(data);
@@ -27,13 +26,23 @@ export default function SupportMessagesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
+
+  useEffect(() => {
+    fetchMessages();
+  }, [fetchMessages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await messageService.sendMessage(newMessage);
-      setNewMessage({ content: '', participantId: '', appointmentId: '' });
+      setNewMessage({
+        content: '',
+        senderId: '',
+        recipientId: '',
+        participantId: '',
+        appointmentId: ''
+      });
       await fetchMessages();
     } catch (err) {
       setError('Failed to send message');

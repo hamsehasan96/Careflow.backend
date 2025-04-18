@@ -1,38 +1,15 @@
 import { api } from './api';
 import { Message, MessageFilters, NewMessage } from '@/types/message';
 
-export interface Message {
-  id: string;
-  senderId: string;
-  senderName: string;
-  content: string;
-  participantId?: string;
-  appointmentId?: string;
-  isRead: boolean;
-  createdAt: string;
-  parentId?: string; // For threaded conversations
-  replies?: Message[]; // Nested replies
-  attachments?: Attachment[];
-}
-
-export interface Attachment {
-  id: string;
-  filename: string;
-  url: string;
-  size: number;
-  type: string;
-}
-
-export interface MessageFilters {
-  participantId?: string;
-  isRead?: boolean;
-  parentId?: string; // For fetching thread replies
-}
-
 export const messageService = {
   async getMessages(filters: MessageFilters): Promise<Message[]> {
-    // TODO: Implement actual API call
-    return [];
+    try {
+      const response = await api.get('/messages', { params: filters });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      throw error;
+    }
   },
 
   async getThread(messageId: string): Promise<Message> {
@@ -41,19 +18,22 @@ export const messageService = {
   },
 
   async sendMessage(message: NewMessage): Promise<Message> {
-    // TODO: Implement actual API call
-    return {
-      id: '1',
-      content: message.content,
-      senderId: message.senderId,
-      recipientId: message.recipientId,
-      status: 'unread',
-      createdAt: new Date().toISOString(),
-    };
+    try {
+      const response = await api.post('/messages', message);
+      return response.data;
+    } catch (error) {
+      console.error('Error sending message:', error);
+      throw error;
+    }
   },
 
   async markAsRead(messageId: string): Promise<void> {
-    // TODO: Implement actual API call
+    try {
+      await api.patch(`/messages/${messageId}/read`);
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+      throw error;
+    }
   },
 
   async deleteMessage(messageId: string): Promise<void> {
