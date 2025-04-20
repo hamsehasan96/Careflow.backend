@@ -31,11 +31,11 @@ interface Claim {
 }
 
 export default function ClaimsPage() {
-  const { provider } = useProvider();
+  const _provider = useProvider();
   const [budgets, setBudgets] = useState<NDISBudget[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
-  const [selectedParticipant, setSelectedParticipant] = useState<string>('');
-  const [dateRange, setDateRange] = useState<{ start: string; end: string }>({
+  const [_selectedParticipant, _setSelectedParticipant] = useState<string>('');
+  const [_dateRange, _setDateRange] = useState<{ start: string; end: string }>({
     start: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
     end: new Date().toISOString().split('T')[0],
   });
@@ -45,7 +45,7 @@ export default function ClaimsPage() {
   useEffect(() => {
     fetchBudgets();
     fetchClaims();
-  }, [selectedParticipant, dateRange]);
+  }, [_selectedParticipant, _dateRange]);
 
   const fetchBudgets = async () => {
     try {

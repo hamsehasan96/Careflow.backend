@@ -76,7 +76,7 @@ const mockRoles = [
 
 export default function StaffPage() {
   const [isLoading, setIsLoading] = useState(true);
-  const [staff, setStaff] = useState(mockStaff);
+  const [_staff, _setStaff] = useState(mockStaff);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState(1); // Default to "All Roles"
   const [statusFilter, setStatusFilter] = useState('all');
@@ -93,7 +93,7 @@ export default function StaffPage() {
   }, []);
 
   // Filter staff based on search term, role, and status
-  const filteredStaff = staff.filter(staffMember => {
+  const filteredStaff = mockStaff.filter(staffMember => {
     const matchesSearch = staffMember.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          staffMember.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          staffMember.role.toLowerCase().includes(searchTerm.toLowerCase());

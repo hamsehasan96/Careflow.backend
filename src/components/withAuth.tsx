@@ -56,7 +56,7 @@ export function withAuth<P extends object>(
       };
 
       checkAuth();
-    }, [router, redirectTo, allowedRoles]);
+    }, [checkAuth]);
 
     if (isLoading) {
       return (

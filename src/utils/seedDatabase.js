@@ -12,7 +12,7 @@ const seedDatabase = async () => {
 
     // Create admin user
     const adminPassword = await bcrypt.hash('admin123', 10);
-    const admin = await User.create({
+    const _admin = await User.create({
       firstName: 'Admin',
       lastName: 'User',
       email: 'admin@careflow.com',
@@ -89,7 +89,7 @@ const seedDatabase = async () => {
       billable: true
     });
 
-    const appointment2 = await Appointment.create({
+    const _appointment2 = await Appointment.create({
       participantId: participant.id,
       staffId: staff.id,
       title: 'Weekly Support Session',

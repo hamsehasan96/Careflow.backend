@@ -11,7 +11,7 @@ export default function AdminAuditPage() {
 
   useEffect(() => {
     fetchLogs();
-  }, [filters]);
+  }, [fetchLogs]);
 
   const fetchLogs = async () => {
     try {

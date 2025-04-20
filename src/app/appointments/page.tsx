@@ -100,7 +100,7 @@ interface FilterState {
 export default function AppointmentsPage() {
   const [view, setView] = useState('month');
   const [date, setDate] = useState(new Date());
-  const [appointments, setAppointments] = useState(sampleAppointments);
+  const [_appointments, _setAppointments] = useState(sampleAppointments);
   const [showModal, setShowModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentEvent | null>(null);
@@ -176,13 +176,13 @@ export default function AppointmentsPage() {
   };
 
   // Handle slot selection for new appointment
-  const handleSelectSlot = ({ start, end }: { start: Date; end: Date }) => {
+  const _handleSelectSlot = (slot: Date) => {
     setSelectedAppointment(null);
     setShowModal(true);
     setFormData({
       title: '',
-      start,
-      end,
+      start: slot,
+      end: addHours(slot, 1),
       clientId: '',
       staffId: '',
       serviceType: '',

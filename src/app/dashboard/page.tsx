@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { BarChart, Calendar, Clock, Users } from 'lucide-react';
+import dynamic from 'next/dynamic';
 
 // Mock data for dashboard
 const mockStats = [
@@ -19,6 +20,17 @@ const mockAppointments = [
   { id: 4, client: 'Emily Davis', service: 'Support Coordination', date: '2025-04-08', time: '02:00 PM', status: 'confirmed' },
   { id: 5, client: 'David Wilson', service: 'Physiotherapy', date: '2025-04-09', time: '09:30 AM', status: 'confirmed' },
 ];
+
+const _BarChart = dynamic(() => import('@/components/charts/BarChart'), { ssr: false });
+const [_stats, _setStats] = useState<DashboardStats>({
+  totalParticipants: 0,
+  activeParticipants: 0,
+  totalStaff: 0,
+  activeStaff: 0,
+  totalAppointments: 0,
+  upcomingAppointments: 0
+});
+const [_appointments, _setAppointments] = useState<Appointment[]>([]);
 
 export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);

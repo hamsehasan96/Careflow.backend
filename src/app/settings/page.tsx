@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Bell, Mail, Lock, CreditCard, User, Building } from 'lucide-react';
+import { Bell, Lock, CreditCard, User, Building } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const _Mail = dynamic(() => import('lucide-react').then(mod => mod.Mail), { ssr: false });
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');

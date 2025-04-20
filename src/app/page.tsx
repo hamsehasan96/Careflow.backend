@@ -11,7 +11,7 @@ export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const _userRole = useUserRole();
 
   useEffect(() => {
     const checkAuth = async () => {

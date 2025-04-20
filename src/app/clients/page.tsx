@@ -61,7 +61,7 @@ const mockClients = [
 
 export default function ClientsPage() {
   const [isLoading, setIsLoading] = useState(true);
-  const [clients, setClients] = useState(mockClients);
+  const [_clients, _setClients] = useState<Client[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
@@ -76,7 +76,7 @@ export default function ClientsPage() {
   }, []);
 
   // Filter clients based on search term and status filter
-  const filteredClients = clients.filter(client => {
+  const filteredClients = mockClients.filter(client => {
     const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          client.ndisNumber.includes(searchTerm);
