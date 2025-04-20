@@ -1,11 +1,7 @@
 {
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier"
-  ],
+  "extends": [],
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
+  "plugins": [],
   "env": {
     "node": true,
     "es6": true
@@ -14,22 +10,8 @@
     "ecmaVersion": 2020,
     "sourceType": "module"
   },
-  "rules": {
-    "@typescript-eslint/no-var-requires": "off",
-    "no-var": "off",
-    "@typescript-eslint/no-unused-vars": "off",
-    "@typescript-eslint/no-explicit-any": "off",
-    "no-console": "off",
-    "no-unused-vars": "off"
-  },
+  "rules": {},
   "ignorePatterns": [
-    "node_modules/",
-    "dist/",
-    "build/",
-    "*.config.js",
-    "*.config.ts",
-    "**/*.d.ts",
-    "src/**/*.js",
-    "src/**/*.ts"
+    "**/*"
   ]
 }
