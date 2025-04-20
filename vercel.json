@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "next build",
+  "buildCommand": "npm run vercel-build",
   "installCommand": "npm install",
   "framework": "nextjs",
   "outputDirectory": ".next",
@@ -8,5 +8,11 @@
     "NEXT_PUBLIC_API_URL": "https://careflow-backend.onrender.com",
     "NEXTAUTH_URL": "https://careflow-frontend.vercel.app",
     "NEXTAUTH_SECRET": "your_nextauth_secret_key_here"
-  }
+  },
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ]
 }

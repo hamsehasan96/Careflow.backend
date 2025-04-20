@@ -10,7 +10,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "prepare": "exit 0",
+    "prepare": "prisma generate",
     "postinstall": "prisma generate",
     "vercel-build": "prisma generate && next build"
   },
