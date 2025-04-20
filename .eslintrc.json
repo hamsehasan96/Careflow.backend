@@ -4,15 +4,10 @@
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",
-    "plugin:react-hooks/recommended"
+    "plugin:react-hooks/recommended",
+    "prettier"
   ],
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "react", "react-hooks"],
-  "env": {
-    "browser": true,
-    "es2021": true,
-    "node": true
-  },
   "parserOptions": {
     "ecmaVersion": 2021,
     "sourceType": "module",
@@ -20,33 +15,35 @@
       "jsx": true
     }
   },
+  "plugins": ["@typescript-eslint", "react", "react-hooks", "prettier"],
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-explicit-any": "warn",
+    "prettier/prettier": "warn",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "no-console": ["warn", { "allow": ["warn", "error"] }]
+  },
   "settings": {
     "react": {
       "version": "detect"
     }
   },
-  "rules": {
-    "@typescript-eslint/no-var-requires": "off",
-    "@typescript-eslint/no-unused-vars": ["warn", {
-      "argsIgnorePattern": "^_",
-      "varsIgnorePattern": "^_",
-      "caughtErrorsIgnorePattern": "^_"
-    }],
-    "@typescript-eslint/no-explicit-any": "warn",
-    "no-console": "off",
-    "no-unused-vars": "off",
-    "react/no-unescaped-entities": "warn",
-    "react-hooks/exhaustive-deps": "warn",
-    "react/react-in-jsx-scope": "off",
-    "react/prop-types": "off"
+  "env": {
+    "browser": true,
+    "node": true,
+    "jest": true
   },
   "ignorePatterns": [
     "node_modules/",
     ".next/",
     "out/",
     "public/",
-    "**/*.d.ts",
-    "**/*.js",
-    "**/*.jsx"
+    "coverage/",
+    "*.config.js",
+    "*.config.ts"
   ]
 }
