@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, AxiosError } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -25,7 +25,7 @@ api.interceptors.request.use((config: AxiosRequestConfig) => {
 
 // Add response interceptor for error handling
 api.interceptors.response.use(
-  (response) => response,
+  (response: AxiosResponse) => response,
   (error: AxiosError) => {
     if (error.code === 'ECONNABORTED') {
       return Promise.reject(new Error('Request timeout - backend service might be down'));

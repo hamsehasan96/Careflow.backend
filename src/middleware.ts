@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import type { NextRequest } from 'next/server';
 
-// List of allowed origins for CORS
+// List of allowed origins
 const allowedOrigins = [
   'https://careflow-frontend.vercel.app',
   'http://localhost:3000',
@@ -23,22 +23,32 @@ const protectedRoutes = {
 
 export function middleware(request: NextRequest) {
   // Get the origin from the request headers
-  const origin = request.headers.get('origin') || '*';
+  const origin = request.headers.get('origin') || '';
+  
+  // Check if the origin is allowed
+  const isAllowedOrigin = allowedOrigins.includes(origin);
 
   // Clone the response
   const response = NextResponse.next();
 
-  // Add CORS headers
-  response.headers.set('Access-Control-Allow-Origin', origin);
-  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  response.headers.set('Access-Control-Allow-Credentials', 'true');
+  // Add CORS headers only for allowed origins
+  if (isAllowedOrigin) {
+    response.headers.set('Access-Control-Allow-Origin', origin);
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+  }
 
   // Add security headers
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  // Handle OPTIONS request
+  if (request.method === 'OPTIONS') {
+    return new NextResponse(null, { status: 204 });
+  }
 
   // Rate limiting
   const ip = request.ip || 'unknown';
