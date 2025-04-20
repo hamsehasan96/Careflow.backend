@@ -1,84 +1,63 @@
-# CareFlow Frontend
+# CareFlow SaaS Platform
 
-A modern, user-friendly frontend for the CareFlow NDIS service provider platform.
+A comprehensive healthcare management system for providers and patients.
 
 ## Features
 
-- **Authentication**: Secure login and registration system
-- **Dashboard**: Overview of appointments, clients, and staff
-- **Client Management**: Add, edit, and view client profiles
-- **Appointment Booking**: Calendar view with appointment creation and editing
-- **Staff Management**: Add, view, and edit support workers
-- **Settings**: Update profile, organization, and notification preferences
+- Provider and patient management
+- Appointment scheduling
+- Electronic health records
+- Secure messaging
+- Billing and payments
+- Analytics dashboard
 
 ## Tech Stack
 
-- Next.js (React framework)
-- TailwindCSS (Styling)
-- NextAuth.js (Authentication)
-- Axios (API requests)
+- Frontend: Next.js, React, TypeScript, TailwindCSS
+- Backend: Node.js, Express
+- Database: PostgreSQL
+- Authentication: NextAuth.js
+- State Management: Zustand
+- Testing: Jest, React Testing Library
 
 ## Getting Started
 
-### Prerequisites
-
-- Node.js 18+ and npm
-
-### Installation
-
 1. Clone the repository
-```bash
-git clone https://github.com/yourusername/careflow-frontend.git
-cd careflow-frontend
-```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up environment variables:
+   ```bash
+   cp .env.example .env.local
+   ```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-2. Install dependencies
-```bash
-npm install
-```
+## Development
 
-3. Create a `.env.local` file in the root directory with the following variables:
-```
-NEXT_PUBLIC_API_URL=https://your-backend-api.com
-NEXTAUTH_SECRET=your-secret-key
-NEXTAUTH_URL=http://localhost:3000
-```
-
-4. Start the development server
-```bash
-npm run dev
-```
-
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
-
-## Deployment
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run test` - Run tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage
 
 ## Environment Variables
 
-- `NEXT_PUBLIC_API_URL`: URL of your backend API
-- `NEXTAUTH_SECRET`: A secure random string for NextAuth.js
-- `NEXTAUTH_URL`: URL of your deployed frontend
+See `.env.example` for required environment variables.
 
-## Project Structure
+## Contributing
 
-```
-src/
-├── app/                  # Next.js App Router
-│   ├── auth/             # Authentication pages
-│   ├── dashboard/        # Dashboard page
-│   ├── clients/          # Client management
-│   ├── appointments/     # Appointment booking
-│   ├── staff/            # Staff management
-│   └── settings/         # Settings pages
-├── components/           # Reusable components
-├── lib/                  # Utilities and services
-│   ├── api/              # API services
-│   └── auth.ts           # Authentication configuration
-└── types/                # TypeScript type definitions
-```
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License.
