@@ -1,6 +1,8 @@
-# CareFlow SaaS Platform
+# CareFlow Frontend
 
-A comprehensive healthcare management system for providers and patients.
+A modern web application for managing care services and support worker coordination.
+
+<!-- Test comment to verify deployment script -->
 
 ## Features
 
