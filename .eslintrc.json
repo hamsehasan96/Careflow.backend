@@ -1,35 +1,18 @@
 {
   "root": true,
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
-  ],
+  "extends": [],
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
+  "plugins": [],
   "env": {
     "node": true,
-    "es6": true,
-    "jest": true
+    "es6": true
   },
   "parserOptions": {
     "ecmaVersion": 2020,
-    "sourceType": "module",
-    "project": "./tsconfig.json"
+    "sourceType": "module"
   },
-  "rules": {
-    "@typescript-eslint/no-var-requires": "off",
-    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
-    "@typescript-eslint/no-explicit-any": "warn",
-    "no-console": "off",
-    "no-unused-vars": "off"
-  },
+  "rules": {},
   "ignorePatterns": [
-    "node_modules/",
-    "dist/",
-    "build/",
-    "*.config.js",
-    "*.config.ts",
-    "**/*.d.ts",
-    "coverage/"
+    "**/*"
   ]
 }
