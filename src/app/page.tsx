@@ -11,6 +11,7 @@ export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -18,6 +19,7 @@ export default function Home() {
         const user = await authService.getCurrentUser();
         if (user) {
           setIsAuthenticated(true);
+          setUserRole(user.role);
           // Redirect based on role
           switch (user.role) {
             case 'admin':
@@ -35,6 +37,7 @@ export default function Home() {
         }
       } catch (error) {
         setIsAuthenticated(false);
+        setUserRole(null);
       } finally {
         setIsLoading(false);
       }
@@ -46,7 +49,10 @@ export default function Home() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -97,19 +103,19 @@ export default function Home() {
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm">
+          <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">NDIS Compliance</h3>
             <p className="text-gray-600">
               Stay compliant with NDIS requirements and streamline your reporting process
             </p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-sm">
+          <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure Messaging</h3>
             <p className="text-gray-600">
               Communicate securely with participants and team members
             </p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-sm">
+          <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Automated Invoicing</h3>
             <p className="text-gray-600">
               Generate and manage invoices automatically based on service delivery

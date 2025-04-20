@@ -13,6 +13,14 @@ const rateLimit = new Map();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS = 100; // 100 requests per minute
 
+// Protected routes and their allowed roles
+const protectedRoutes = {
+  '/dashboard/admin': ['admin'],
+  '/dashboard/support': ['admin', 'support'],
+  '/dashboard/participant': ['admin', 'support', 'participant'],
+  '/dashboard': ['admin', 'support', 'participant'],
+};
+
 export async function middleware(request: NextRequest) {
   // CORS headers
   const origin = request.headers.get('origin');
@@ -51,13 +59,43 @@ export async function middleware(request: NextRequest) {
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Content-Security-Policy', "default-src 'self'");
 
-  // Authentication check for protected routes
+  // Authentication and role-based access check
   const token = await getToken({ req: request });
   const isAuthPage = request.nextUrl.pathname.startsWith('/auth');
   const isApiRoute = request.nextUrl.pathname.startsWith('/api');
+  const isPublicRoute = request.nextUrl.pathname === '/';
 
-  if (!token && !isAuthPage && !isApiRoute) {
+  // Allow public routes and auth pages
+  if (isPublicRoute || isAuthPage) {
+    return response;
+  }
+
+  // Redirect to login if not authenticated
+  if (!token && !isApiRoute) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
+  }
+
+  // Check role-based access for protected routes
+  if (token && !isApiRoute) {
+    const userRole = token.role;
+    const currentPath = request.nextUrl.pathname;
+
+    // Find the matching protected route
+    const matchingRoute = Object.entries(protectedRoutes).find(([route]) => 
+      currentPath.startsWith(route)
+    );
+
+    if (matchingRoute) {
+      const [, allowedRoles] = matchingRoute;
+      if (!allowedRoles.includes(userRole)) {
+        // Redirect to appropriate dashboard based on role
+        const redirectPath = userRole === 'admin' ? '/dashboard/admin' :
+                           userRole === 'support' ? '/dashboard/support' :
+                           userRole === 'participant' ? '/dashboard/participant' :
+                           '/dashboard';
+        return NextResponse.redirect(new URL(redirectPath, request.url));
+      }
+    }
   }
 
   // Provider isolation for API routes
