@@ -1,5 +1,4 @@
 const Sentry = require('@sentry/node');
-const { ProfilingIntegration } = require('@sentry/profiling-node');
 const _Integrations = require('@sentry/integrations');
 
 // Initialize Sentry
@@ -13,13 +12,9 @@ const initSentry = () => {
         new Sentry.Integrations.Http({ tracing: true }),
         // Enable Express.js middleware tracing
         new Sentry.Integrations.Express(),
-        // Enable performance monitoring
-        new ProfilingIntegration(),
       ],
       // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring
       tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 1.0,
-      // Set profilesSampleRate to 1.0 to profile all transactions
-      profilesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 0.5,
     });
     console.log(`Sentry initialized in ${process.env.NODE_ENV} environment`);
   } else {
