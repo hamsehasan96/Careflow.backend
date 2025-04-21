@@ -78,52 +78,54 @@ monitoring.initSentry();
 
 // Security middleware
 app.use(monitoring.sentryRequestHandler()); // Sentry request handler should be the first middleware
-app.use(cors({
-  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
+
+// CORS configuration
+const corsOptions = {
+  origin: [
+    'https://careflow-frontend.vercel.app',
+    'http://localhost:3000'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   maxAge: 86400 // 24 hours
-}));
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", process.env.API_URL || "http://localhost:3000"],
-      fontSrc: ["'self'", "https:", "data:"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'none'"],
-      sandbox: ['allow-forms', 'allow-scripts', 'allow-same-origin']
-    }
-  },
-  crossOriginEmbedderPolicy: false,
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
-app.use(xssProtection);
-app.use(parameterProtection);
-app.use(mongoQuerySanitization);
-app.use(securityHeaders);
+};
+app.use(cors(corsOptions));
 
-// Compression middleware
-app.use(compression({
-  level: 6,
-  threshold: 100 * 1000 // Only compress responses larger than 100kb
-}));
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use('/api', limiter);
+
+// Speed limiting
+const speedLimiter = slowDown({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  delayAfter: 100, // allow 100 requests per 15 minutes, then...
+  delayMs: 500 // begin adding 500ms of delay per request above 100
+});
+app.use('/api', speedLimiter);
+
+// Body parsing
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Security measures
+app.use(mongoSanitize()); // Prevent NoSQL injection
+app.use(hpp()); // Prevent HTTP Parameter Pollution
+
+// Logging
+app.use(morgan('combined'));
+
+// Compression
+app.use(compression());
 
 // Performance monitoring
 app.use(performanceMonitor);
 
 // Cache middleware for GET requests
 app.use(cacheMiddleware());
-
-// Standard middleware
-app.use(morgan('combined', { stream: logger.stream }));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Sanitization middleware
 app.use(sanitizeBody);
