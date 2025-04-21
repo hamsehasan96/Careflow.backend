@@ -60,6 +60,26 @@ services:
         value: postgres
       - key: DB_SSL
         value: true
+      - key: DB_HOST
+        fromDatabase:
+          name: careflow-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: careflow-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: careflow-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: careflow-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: careflow-db
+          property: password
     healthCheckPath: /api/health
     autoDeploy: true
     disk:
