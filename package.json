@@ -36,7 +36,8 @@
     "csurf": "^1.11.0",
     "xss-clean": "^0.1.4",
     "jsdom": "^24.0.0",
-    "dompurify": "^3.0.9"
+    "dompurify": "^3.0.9",
+    "json2csv": "^5.0.7"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
