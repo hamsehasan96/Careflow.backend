@@ -13,7 +13,11 @@ const { apiLimiter, authLimiter, workerLimiter } = require(path.join(__dirname, 
 const { validate, sanitize, validateApiKey } = require(path.join(__dirname, 'middleware', 'validate.middleware'));
 const { performanceMonitor, healthCheck } = require(path.join(__dirname, 'middleware', 'performance.middleware'));
 const cacheMiddleware = require(path.join(__dirname, 'middleware', 'cache.middleware'));
-require('dotenv').config();
+const rateLimit = require('express-rate-limit');
+const slowDown = require('express-slow-down');
+const mongoSanitize = require('express-mongo-sanitize');
+const hpp = require('hpp');
+const { PrismaClient } = require('@prisma/client');
 
 // Import security middleware
 const { 
@@ -60,6 +64,7 @@ const staffRoutes = require('./routes/staff.routes');
 const goalRoutes = require('./routes/goal.routes');
 // Commented out to fix Render deployment - Route.get() requires a callback function error
 // const securityRoutes = require('./routes/security.routes');
+const testRoutes = require('./routes/test.routes');
 
 // Routes that are not yet implemented
 // const userActivityRoutes = require('./routes/useractivity.routes');  // File doesn't exist
@@ -69,6 +74,8 @@ const goalRoutes = require('./routes/goal.routes');
 // const notificationRoutes = require('./routes/notification.routes');
 // const emailRoutes = require('./routes/email.routes');
 // const schedulerRoutes = require('./routes/scheduler.routes');
+
+const prisma = new PrismaClient();
 
 // Initialize express app
 const app = express();
@@ -81,7 +88,7 @@ app.use(monitoring.sentryRequestHandler()); // Sentry request handler should be 
 
 // CORS configuration
 const corsOptions = {
-  origin: [
+  origin: process.env.CORS_ALLOWED_ORIGINS?.split(',') || [
     'https://careflow-frontend.vercel.app',
     'http://localhost:3000'
   ],
@@ -92,28 +99,49 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      connectSrc: ["'self'", ...corsOptions.origin],
+      imgSrc: ["'self'", "data:", "https:"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"]
+    }
+  },
+  crossOriginEmbedderPolicy: false
+}));
+
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: process.env.RATE_LIMIT_MAX || 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many requests from this IP, please try again later.',
+  skip: (req) => {
+    // Skip rate limiting for health check endpoints
+    return req.path === '/health' || req.path === '/api/health';
+  }
 });
 app.use('/api', limiter);
 
 // Speed limiting
 const speedLimiter = slowDown({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  delayAfter: 100, // allow 100 requests per 15 minutes, then...
-  delayMs: 500 // begin adding 500ms of delay per request above 100
+  windowMs: 15 * 60 * 1000,
+  delayAfter: process.env.RATE_LIMIT_MAX || 100,
+  delayMs: 500
 });
 app.use('/api', speedLimiter);
 
 // Body parsing
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: process.env.MAX_FILE_SIZE || '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: process.env.MAX_FILE_SIZE || '10mb' }));
 
 // Security measures
-app.use(mongoSanitize()); // Prevent NoSQL injection
-app.use(hpp()); // Prevent HTTP Parameter Pollution
+app.use(mongoSanitize());
+app.use(hpp());
 
 // Logging
 app.use(morgan('combined'));
@@ -150,7 +178,24 @@ app.use('/api/auth/', authLimiter);
 app.use('/api/workers', workerLimiter);
 
 // Health check endpoint
-app.get('/health', healthCheck);
+app.get('/api/health', async (req, res) => {
+  try {
+    // Test database connection
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({ 
+      status: 'ok',
+      database: 'connected',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Health check failed:', error);
+    res.status(500).json({ 
+      status: 'error',
+      message: 'Database connection failed',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
 
 // Add root route handler
 app.get('/', (req, res) => {
@@ -185,6 +230,9 @@ app.use('/api/staff', staffRoutes);
 app.use('/api/goals', goalRoutes);
 // Commented out to fix Render deployment - Route.get() requires a callback function error
 // app.use('/api/security', securityRoutes);
+
+// Register test routes
+app.use('/api/test', testRoutes);
 
 // Future route registrations
 // app.use('/api/user-activity', userActivityRoutes);  // Route commented out - file doesn't exist
