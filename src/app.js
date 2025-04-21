@@ -89,10 +89,11 @@ app.use(monitoring.sentryRequestHandler()); // Sentry request handler should be 
 const corsOptions = {
   origin: process.env.CORS_ALLOWED_ORIGINS?.split(',') || [
     'https://careflow-frontend.vercel.app',
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
   credentials: true,
   maxAge: 86400 // 24 hours
 };
