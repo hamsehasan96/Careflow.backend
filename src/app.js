@@ -9,7 +9,6 @@ const morgan = require('morgan');
 const logger = require(path.join(__dirname, 'config', 'logger'));
 const monitoring = require(path.join(__dirname, 'config', 'monitoring'));
 const { errorHandler, handleUnhandledRejection, handleUncaughtException } = require(path.join(__dirname, 'middleware', 'error.middleware'));
-const { apiLimiter, authLimiter, workerLimiter } = require(path.join(__dirname, 'middleware', 'rateLimit.middleware'));
 const { validate, sanitize, validateApiKey } = require(path.join(__dirname, 'middleware', 'validate.middleware'));
 const { performanceMonitor, healthCheck } = require(path.join(__dirname, 'middleware', 'performance.middleware'));
 const cacheMiddleware = require(path.join(__dirname, 'middleware', 'cache.middleware'));
@@ -113,27 +112,49 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.RATE_LIMIT_MAX || 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: 'Too many requests from this IP, please try again later.',
-  skip: (req) => {
-    // Skip rate limiting for health check endpoints
-    return req.path === '/health' || req.path === '/api/health';
-  }
-});
-app.use('/api', limiter);
+// Rate limiting configuration
+const createRateLimiter = (options = {}) => {
+  return rateLimit({
+    windowMs: options.windowMs || 15 * 60 * 1000, // 15 minutes
+    max: options.max || process.env.RATE_LIMIT_MAX || 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+      status: 'error',
+      message: 'Too many requests from this IP, please try again later.',
+      retryAfter: options.windowMs / 1000
+    },
+    handler: (req, res) => {
+      res.status(429).json({
+        status: 'error',
+        message: 'Too many requests from this IP, please try again later.',
+        retryAfter: options.windowMs / 1000
+      });
+    },
+    skip: (req) => {
+      // Skip rate limiting for health check and documentation endpoints
+      const excludedPaths = ['/health', '/api/health', '/api/docs', '/api/docs.json'];
+      return excludedPaths.includes(req.path);
+    },
+    ...options
+  });
+};
 
-// Speed limiting
-const speedLimiter = slowDown({
-  windowMs: 15 * 60 * 1000,
-  delayAfter: process.env.RATE_LIMIT_MAX || 100,
-  delayMs: 500
+// Apply different rate limits for different routes
+const apiLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: process.env.API_RATE_LIMIT_MAX || 100
 });
-app.use('/api', speedLimiter);
+
+const authLimiter = createRateLimiter({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: process.env.AUTH_RATE_LIMIT_MAX || 5
+});
+
+const workerLimiter = createRateLimiter({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: process.env.WORKER_RATE_LIMIT_MAX || 50
+});
 
 // Body parsing
 app.use(express.json({ limit: process.env.MAX_FILE_SIZE || '10mb' }));
