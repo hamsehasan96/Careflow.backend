@@ -4,14 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "npm install && prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "prepare": "prisma generate",
-    "postinstall": "prisma generate",
+    "postinstall": "npm install prisma && prisma generate",
     "vercel-build": "prisma generate && next build"
   },
   "dependencies": {
@@ -82,7 +82,8 @@
     "postcss": "^8.4.35",
     "prettier": "^3.2.5",
     "ts-jest": "^29.1.2",
-    "prisma": "^5.10.2"
+    "prisma": "^5.10.2",
+    "nodemon": "^2.0.15"
   },
   "resolutions": {
     "@types/react": "^18.2.55"
