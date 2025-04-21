@@ -5,7 +5,7 @@
   "scripts": {
     "start": "concurrently \"npm --prefix . run dev\" \"npm --prefix frontend run dev\"",
     "dev": "nodemon src/app.js",
-    "build": "npm install && prisma generate",
+    "build": "npm install",
     "postinstall": "prisma generate"
   },
   "dependencies": {
