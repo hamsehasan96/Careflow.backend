@@ -34,7 +34,8 @@
     "winston": "^3.11.0",
     "node-cache": "^5.1.2",
     "csurf": "^1.11.0",
-    "xss-clean": "^0.1.4"
+    "xss-clean": "^0.1.4",
+    "jsdom": "^24.0.0"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
