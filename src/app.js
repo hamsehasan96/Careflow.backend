@@ -219,6 +219,11 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Add ping route for health checks
+app.get('/api/ping', (req, res) => {
+  res.status(200).json({ message: 'pong' });
+});
+
 // Add root route handler
 app.get('/', (req, res) => {
   res.status(200).json({
@@ -332,8 +337,8 @@ const initializeApp = async () => {
       }
     }
     
-    // Start server
-    const PORT = process.env.PORT || 3000;
+    // Start server with proper port binding
+    const PORT = process.env.PORT || 3001;
     const server = app.listen(PORT, '0.0.0.0', () => {
       logger.info(`Server is running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV}`);
@@ -380,4 +385,5 @@ const initializeApp = async () => {
 // Run the initialization
 initializeApp();
 
+// Export the app for testing and Render deployment
 module.exports = app;
