@@ -2,7 +2,7 @@ services:
   - type: web
     name: careflow-backend
     env: node
-    buildCommand: npm install && npx prisma generate
+    buildCommand: npm ci && npx prisma generate
     startCommand: npm start
     envVars:
       - key: NODE_ENV
